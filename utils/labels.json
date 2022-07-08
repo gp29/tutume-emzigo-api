@@ -1,0 +1,32 @@
+{
+    "LBL_MISSING_PARAMETERS": {
+        "EN": "There are one or more parameters missing in the supplied request"
+    },
+    "LBL_INTERNAL_SERVER": {
+        "EN": "Internal server error"
+    },
+    "LBL_USER_NOT_FOUND": {
+        "EN": "Your account is not longer in our system"
+    },
+    "LBL_EMAIL_NOT_FOUND": {
+        "EN": "Email ID not exists"
+    },
+    "LBL_MOBILE_NOT_FOUND": {
+        "EN": "Mobile not registered"
+    },
+    "LBL_INVALID_PWD": {
+        "EN": "Invalid password"
+    },
+    "LBL_INVALID_OTP": {
+        "EN": "Invalid OTP"
+    },
+    "LBL_EMAIL_OR_MOBILE_ALREADY_EXISTS": {
+        "EN": "Email or Mobile already exists in our system"
+    },
+    "LBL_EMAIL_ALREADY_EXISTS": {
+        "EN": "Email already exists in our system"
+    },
+    "LBL_ACCOUNT_INACTIVE": {
+        "EN": "Your account has been deactivated, please contact to admin"
+    }
+}

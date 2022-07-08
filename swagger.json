@@ -1,0 +1,92 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Tutume E-mzigo",
+        "description": "Tutume E-mzigo"
+    },
+    "paths": {
+        "/rider/signin": {
+            "post": {
+                "x-controller-name": "RiderController",
+                "x-operation-name": "SignIn",
+                "tags": ["RiderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "SignIn",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "RiderController.SignIn"
+            }
+        },
+        "/rider/new-trips": {
+            "get": {
+                "x-controller-name": "RiderController",
+                "x-operation-name": "NewTrips",
+                "tags": ["RiderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "NewTrips",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "rider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "page",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }],
+                "operationId": "RiderController.NewTrips"
+            }
+        }
+    },
+    "components": {},
+    "servers": [{
+        "url": "http://localhost:1440/api"
+    }]
+}
