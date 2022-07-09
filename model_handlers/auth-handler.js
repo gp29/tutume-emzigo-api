@@ -28,6 +28,16 @@ const login = async(requestParam) => {
                 reject(errors(labels.LBL_INVALID_PWD[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
+            const inserRecord = {
+                mobile: response.mobile,
+                name: response.name,
+                type: 'Admin',
+                login_id: response.user_id,
+                ip: requestParam.ip_address,
+            };
+            let res = await query.insertSingle(dbConstants.dbSchema.login_logs, inserRecord)
+            response = JSON.parse(JSON.stringify(response));
+            response.loginlog_id = res.loginlog_id
             resolve(response);
             return;
         } catch (error) {
@@ -38,6 +48,21 @@ const login = async(requestParam) => {
     })
 };
 
+const logout = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            requestParam['logout_date'] = new Date();
+            await query.updateSingle(dbConstants.dbSchema.login_logs, requestParam, {loginlog_id: requestParam.loginlog_id});
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
-    login
+    login,
+    logout
 };

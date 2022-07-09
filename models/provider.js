@@ -4,53 +4,65 @@ var Schema = mongoose.Schema;
 const idGenerator = require('./../utils/id-generator');
 
 // create a schema
-var settingsSchema = new Schema({
-    settings_id: {
+var providerSchema = new Schema({
+    provider_id: {
         type: String,
         default:''
     },
-    currency: {
+    vehicle_id: {
         type: String,
         default:''
     },
-    fb_url:{
+    name: {
         type: String,
         default:''
     },
-    twitter_url:{
+    email: {
         type: String,
         default:''
     },
-    instagram_url:{
+    mobile_country_code: {
         type: String,
         default:''
     },
-    linkedin_url:{
+    mobile: {
         type: String,
         default:''
     },
-    call_us:{
+    password: {
         type: String,
         default:''
     },
-    sos_number:{
+    profile_photo: {
         type: String,
         default:''
     },
-    support_email:{
+    id_photo: {
         type: String,
         default:''
     },
-    company_address:{
+    address: {
         type: String,
         default:''
     },
+    status: {
+        type: String,
+        default:''
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 // // Execute before each user.save() call
-settingsSchema.pre('save', async function(callback) {
-    this.settings_id = await idGenerator.generateId('ROL'); 
+providerSchema.pre('save', async function(callback) {
+    this.provider_id = await idGenerator.generateId('PRO'); 
 });
 
-var Settings = mongoose.model('Settings', settingsSchema);
-module.exports = Settings;
+var Provider = mongoose.model('Provider', providerSchema);
+module.exports = Provider;

@@ -28,6 +28,13 @@ class S3Handler {
         })
     };
 
+    writeFile(file_data,fileName, bucket, contentType, done) {
+        const params = {Bucket: bucket, Key: fileName, Body: file_data, ContentType : contentType, ACL : 'public-read'};
+        this._s3.upload(params, function(err, data) {
+            done(err, data);
+        });
+    };
+
     pdfUpload(requestParam) {
         return new Promise((resolve, reject) => {
             const file_data = fs.readFileSync(requestParam.path);

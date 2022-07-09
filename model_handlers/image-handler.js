@@ -52,6 +52,15 @@ const getImage = (params) => {
                 if(params.key.includes("customers") == true){
                     img = config.aws.prefix + config.aws.s3.customerBucket + '/' + key
                 }
+                if(params.key.includes("vehicles") == true){
+                    img = config.aws.prefix + config.aws.s3.vehicleBucket + '/' + key
+                }
+                if(params.key.includes("providers") == true){
+                    img = config.aws.prefix + config.aws.s3.providerBucket + '/' + key
+                }
+                if(params.key.includes("cms") == true){
+                    img = config.aws.prefix + config.aws.s3.cmsBucket + '/' + key
+                }
                 resolve(img);
                 return;
             } catch (error) {

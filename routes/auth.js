@@ -22,4 +22,13 @@ router.post('/login', async(req, res) => {
     }
 });
 
+router.post('/logout', async(req, res) => {
+    try {
+        let response = await authHandler.logout(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

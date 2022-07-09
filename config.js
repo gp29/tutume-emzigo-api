@@ -13,6 +13,9 @@ const requiredParams = [
     'AWS_S3_BUCKET_NAME',
     'AWS_S3_URL_PRIFIX',
     'AWS_S3_CUSTOMER_BUCKET',
+    'AWS_S3_VEHICLE_BUCKET',
+    'AWS_S3_PROVIDER_BUCKET',
+    'AWS_S3_CMS_BUCKET',
     'DATABASE_URL',
     'TIME_ZONE',
 ];
@@ -43,6 +46,9 @@ module.exports = {
         prefix: process.env.AWS_S3_URL_PRIFIX,
         s3: {
             customerBucket: process.env.AWS_S3_CUSTOMER_BUCKET,
+            vehicleBucket: process.env.AWS_S3_VEHICLE_BUCKET,
+            providerBucket: process.env.AWS_S3_PROVIDER_BUCKET,
+            cmsBucket: process.env.AWS_S3_CMS_BUCKET,
 	    },
 	}
 };

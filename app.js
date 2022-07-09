@@ -20,6 +20,20 @@ mongoose.connect(config.database_url, {useNewUrlParser: true, useUnifiedTopology
 //routes
 const routes = require('./routes/index');
 const auth = require('./routes/auth');
+const user = require('./routes/user');
+const loginLog = require('./routes/login-log');
+const customer = require('./routes/customer');
+const vehicle = require('./routes/vehicle');
+const provider = require('./routes/provider');
+const deliveryOption = require('./routes/delivery-option');
+const price = require('./routes/price');
+const settings = require('./routes/settings');
+const email = require('./routes/email');
+const push = require('./routes/push');
+const faqCategory = require('./routes/faq-category');
+const faq = require('./routes/faq');
+const cms = require('./routes/cms');
+const coupon = require('./routes/coupon');
 
 //other configurations
 const passport = require('passport');
@@ -49,6 +63,20 @@ const responseCodes = require('./utils/response-codes');
 // import routes
 app.use('/',routes);
 app.use('/api/auth', auth);
+app.use('/api/user', user);
+app.use('/api/login-log', loginLog);
+app.use('/api/customer', customer);
+app.use('/api/vehicle', vehicle);
+app.use('/api/provider', provider);
+app.use('/api/delivery-option', deliveryOption);
+app.use('/api/vehicle-price', price);
+app.use('/api/settings', settings);
+app.use('/api/email', email);
+app.use('/api/push', push);
+app.use('/api/faq-category', faqCategory);
+app.use('/api/faq', faq);
+app.use('/api/cms', cms);
+app.use('/api/coupon', coupon);
 
 app.use(upload());
 
