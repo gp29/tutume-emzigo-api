@@ -20,6 +20,7 @@ mongoose.connect(config.database_url, {useNewUrlParser: true, useUnifiedTopology
 //routes
 const routes = require('./routes/index');
 const auth = require('./routes/auth');
+const dashboard = require('./routes/dashboard');
 const user = require('./routes/user');
 const loginLog = require('./routes/login-log');
 const customer = require('./routes/customer');
@@ -34,6 +35,7 @@ const faqCategory = require('./routes/faq-category');
 const faq = require('./routes/faq');
 const cms = require('./routes/cms');
 const coupon = require('./routes/coupon');
+const job = require('./routes/job');
 
 //other configurations
 const passport = require('passport');
@@ -63,6 +65,7 @@ const responseCodes = require('./utils/response-codes');
 // import routes
 app.use('/',routes);
 app.use('/api/auth', auth);
+app.use('/api/dashboard', dashboard);
 app.use('/api/user', user);
 app.use('/api/login-log', loginLog);
 app.use('/api/customer', customer);
@@ -77,6 +80,7 @@ app.use('/api/faq-category', faqCategory);
 app.use('/api/faq', faq);
 app.use('/api/cms', cms);
 app.use('/api/coupon', coupon);
+app.use('/api/job', job);
 
 app.use(upload());
 

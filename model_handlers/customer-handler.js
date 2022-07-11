@@ -5,11 +5,15 @@ const errors = require('./../utils/dz-errors');
 const dbConstants = require('./../constants/db-constants');
 const query = require('./../utils/query-creator');
 const customer = require('./../models/customer');
+const job = require('./../models/job');
 const _ = require('underscore');
 const labels = require('./../utils/labels.json');
 const responseCodes = require('./../utils/response-codes');
 const timeZone = require('moment-timezone');
 const imgHandler = require('./../model_handlers/image-handler');
+const distance = require('google-distance');
+distance.apiKey = config.google_key;
+const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -205,10 +209,144 @@ const action = async(requestParam) => {
     })
 };
 
+// FOR API
+const checkPrice = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.vehicles, {vehicle_id:requestParam.vehicle_id}, { _id:0, vehicle_id: 1} );
+            if(!vehicle){
+                reject(errors(labels.LBL_VEHICLE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let delivery_option = await query.selectWithAndOne(dbConstants.dbSchema.delivery_options, {delivery_option_id:requestParam.delivery_option_id}, { _id:0, customer_id: 1} );
+            if(!delivery_option){
+                reject(errors(labels.LBL_DELIVERY_OPTION_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let vehicle_price = await query.selectWithAndOne(dbConstants.dbSchema.vehicle_prices, {vehicle_id:requestParam.vehicle_id, delivery_option_id:requestParam.delivery_option_id}, { _id:0} );
+            if(vehicle_price){
+                distance.get({
+                    origin: requestParam.pickup_address,
+                    destination: requestParam.delivery_address
+                },
+                async function (err, data) {
+                    if(!data || err){
+                        reject(errors(labels.LBL_DISTANCE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                        return;
+                    }
+                    let kms = (data.distanceValue/1000);
+                    let delivery_price = parseFloat(vehicle_price.base_fare) + (kms*parseFloat(vehicle_price.per_km_fare))
+                    let obj = {
+                        total:parseFloat(delivery_price.toFixed(2)),
+                        total_distance : data.distanceValue,
+                        formatted_distance: data.distance,
+                        total_duration: data.durationValue,
+                        formatted_duration: data.duration,
+                    }
+                    resolve(await encryptDecryptHandler.encrypt(obj));
+                    return;
+                });
+            }
+            else{
+                let obj = {
+                    total:0,
+                    total_distance : 0,
+                    formatted_distance: 0,
+                    total_duration: 0,
+                    formatted_duration: 0,
+                }
+                resolve(await encryptDecryptHandler.encrypt(obj));
+                return;
+            }
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const createJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.vehicles, {vehicle_id:requestParam.vehicle_id}, { _id:0, vehicle_id: 1} );
+            if(!vehicle){
+                reject(errors(labels.LBL_VEHICLE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let delivery_option = await query.selectWithAndOne(dbConstants.dbSchema.delivery_options, {delivery_option_id:requestParam.delivery_option_id}, { _id:0, customer_id: 1} );
+            if(!delivery_option){
+                reject(errors(labels.LBL_DELIVERY_OPTION_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(requestParam.coupon_id && requestParam.coupon_id !== ''){
+                let coupon = await query.selectWithAndOne(dbConstants.dbSchema.coupons, {coupon_id:requestParam.coupon_id}, { _id:0, coupon_id: 1, total_used:1} );
+                if(coupon){
+                    await query.updateSingle(dbConstants.dbSchema.coupons, {$inc:{total_used: 1}}, {coupon_id: requestParam.coupon_id});
+                }
+            }
+            await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const updateJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.vehicles, {vehicle_id:requestParam.vehicle_id}, { _id:0, vehicle_id: 1} );
+            if(!vehicle){
+                reject(errors(labels.LBL_VEHICLE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let delivery_option = await query.selectWithAndOne(dbConstants.dbSchema.delivery_options, {delivery_option_id:requestParam.delivery_option_id}, { _id:0, customer_id: 1} );
+            if(!delivery_option){
+                reject(errors(labels.LBL_DELIVERY_OPTION_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
     create,
     update,
     action,
+
+    // FOR API
+    checkPrice,
+    createJob,
+    updateJob,
 };

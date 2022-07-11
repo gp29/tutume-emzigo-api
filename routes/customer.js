@@ -5,6 +5,8 @@ const jsonResponse = require('./../utils/json-response');
 const express = require('express');
 const router = express.Router();
 const customerHandler = require('./../model_handlers/customer-handler');
+const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
+const labels = require('./../utils/labels.json')
 
 router.post('/create', async(req, res) => {
     try {
@@ -47,6 +49,46 @@ router.post('/update', async(req, res) => {
     try {
         let requestParam = JSON.parse(req.body.fields);
         let response = await customerHandler.update(requestParam, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.get('/check-price', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        if (!req.query.customer_id || !req.query.vehicle_id || !req.query.delivery_option_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        if (!req.query.pickup_address || !req.query.delivery_address) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.checkPrice(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/create-job', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.customer_id || !req.body.vehicle_id || !req.body.delivery_option_id || !req.body.pickup_from || !req.body.item_name || !req.body.item_desc) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        if (!req.body.pickup_address || !req.body.pickup_latitude || !req.body.pickup_longitude) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        if (!req.body.delivery_address || !req.body.delivery_latitude || !req.body.delivery_longitude) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.createJob(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

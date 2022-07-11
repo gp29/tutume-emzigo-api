@@ -17,7 +17,11 @@ const requiredParams = [
     'AWS_S3_PROVIDER_BUCKET',
     'AWS_S3_CMS_BUCKET',
     'DATABASE_URL',
+    'PUSH_KEY',
+    'GOOGLE_KEY',
     'TIME_ZONE',
+    'AES_256_KEY',
+    'AES_256_IV',
 ];
 
 for (let i = 0; i < requiredParams.length; i++) {
@@ -38,6 +42,12 @@ module.exports = {
 	appName: process.env.APP_NAME,
 	port: process.env.PORT,
     database_url: process.env.DATABASE_URL,
+    push_key: process.env.PUSH_KEY,
+    google_key: process.env.GOOGLE_KEY,
+    aes256:{
+        key:process.env.AES_256_KEY,
+        iv:process.env.AES_256_IV
+    },
 	aws:{
 		keyId: process.env.AWS_ACCESS_KEY_ID,
         key: process.env.AWS_ACCESS_SECRET_KEY,

@@ -33,6 +33,10 @@ var customerSchema = new Schema({
         type: String,
         default:''
     },
+    device_token: {
+        type: String,
+        default:''
+    },
     status: {
         type: String,
         default:''

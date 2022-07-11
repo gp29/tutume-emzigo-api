@@ -4,12 +4,11 @@ const responseCodes = require('./../utils/response-codes');
 const jsonResponse = require('./../utils/json-response');
 const express = require('express');
 const router = express.Router();
-const providerHandler = require('./../model_handlers/provider-handler');
+const jobHandler = require('./../model_handlers/job-handler');
 
-router.post('/create', async(req, res) => {
+router.get('/get', async(req, res) => {
     try {
-        let requestParam = JSON.parse(req.body.fields);
-        let response = await providerHandler.create(requestParam, req);
+        let response = await jobHandler.get(req.query);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -18,16 +17,34 @@ router.post('/create', async(req, res) => {
 
 router.post('/get-sort', async(req, res) => {
     try {
-        let response = await providerHandler.getSort(req.body);
+        let response = await jobHandler.getSort(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
 });
 
-router.get('/get', async(req, res) => {
+router.post('/get-coupon-reports', async(req, res) => {
     try {
-        let response = await providerHandler.get(req.query);
+        let response = await jobHandler.getCouponReports(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/create-job-backend', async(req, res) => {
+    try {
+        let response = await jobHandler.createJobBackend(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/update-job-backend', async(req, res) => {
+    try {
+        let response = await jobHandler.updateJobBackend(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -36,26 +53,7 @@ router.get('/get', async(req, res) => {
 
 router.post('/action', async(req, res) => {
     try {
-        let response = await providerHandler.action(req.body);
-        jsonResponse(res, responseCodes.OK, null, response);
-    } catch (error) {
-        jsonResponse(res, error.code, error, null);
-    }
-});
-
-router.post('/send-notification', async(req, res) => {
-    try {
-        let response = await providerHandler.sendNotification(req.body);
-        jsonResponse(res, responseCodes.OK, null, response);
-    } catch (error) {
-        jsonResponse(res, error.code, error, null);
-    }
-});
-
-router.post('/update', async(req, res) => {
-    try {
-        let requestParam = JSON.parse(req.body.fields);
-        let response = await providerHandler.update(requestParam, req);
+        let response = await jobHandler.action(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

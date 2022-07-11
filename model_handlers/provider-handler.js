@@ -10,6 +10,8 @@ const labels = require('./../utils/labels.json');
 const responseCodes = require('./../utils/response-codes');
 const timeZone = require('moment-timezone');
 const imgHandler = require('./../model_handlers/image-handler');
+const FCM = require('fcm-push');
+let fcm = new FCM(config.push_key);
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -223,10 +225,67 @@ const action = async(requestParam) => {
     })
 };
 
+const sendNotification = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let providers = await query.selectWithAnd(dbConstants.dbSchema.providers, {
+                provider_id: {
+                    $in: requestParam.ids
+                }
+            }, {
+                _id: 0,
+                provider_id: 1,
+                device_token: 1
+            }, {
+                created_at: 1
+            });
+            sendNotiProvider(providers, requestParam.title)
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const sendNotiProvider = async(providers, title) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await Promise.all(providers.map(async(element) => {
+                let message = {
+                    to: element.device_token,
+                    collapse_key: 'your_collapse_key',
+                    content_available: true,
+                    mutable_content: true,
+                    priority: "high",
+                    data: {
+                        type: 'promotion',
+                        title: 'Promotion',
+                    },
+                    notification: {
+                        title: 'Promotion',
+                        body: title,
+                        sound: 'default'
+                    }
+                };
+                fcm.send(message, function(err, response) {
+                    return false;
+                });
+            }))
+            return false;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
     create,
     update,
     action,
+    sendNotification,
 };

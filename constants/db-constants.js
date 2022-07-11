@@ -16,5 +16,6 @@ module.exports = {
         faqs: 'Faq',
         cms: 'Cms',
         coupons: 'Coupon',
+        jobs: 'Job',
     }
 };

@@ -31,5 +31,17 @@
     },
     "LBL_ACCOUNT_INACTIVE": {
         "EN": "Your account has been deactivated, please contact to admin"
+    },
+    "LBL_VEHICLE_NOT_FOUND": {
+        "EN": "Vehicle not exists in our system"
+    },
+    "LBL_DELIVERY_OPTION_NOT_FOUND": {
+        "EN": "Vehicle not exists in our system"
+    },
+    "LBL_JOB_NOT_FOUND": {
+        "EN": "Job not exists in our system"
+    },
+    "LBL_DISTANCE_NOT_FOUND": {
+        "EN": "Google API key was expired or didn't found distace on addresses."
     }
 }
