@@ -41,6 +41,10 @@ var settingsSchema = new Schema({
         type: String,
         default:''
     },
+    whatsapp_number:{
+        type: String,
+        default:''
+    },
     company_address:{
         type: String,
         default:''

@@ -13,7 +13,7 @@ const timeZone = require('moment-timezone');
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id: 0}, { created_at: 1 });
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id: 0, created_at:0, updated_at:0, __v:0}, { created_at: 1 });
             if(!response){
                 resolve({});
                 return;

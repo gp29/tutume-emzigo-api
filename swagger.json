@@ -762,6 +762,7 @@
                 "operationId": "VehicleController.List"
             }
         },
+
         "/delivery-option/list": {
             "get": {
                 "x-controller-name": "DeliveryOptionController",
@@ -785,6 +786,32 @@
                 },
                 "parameters": [],
                 "operationId": "DeliveryOptionController.List"
+            }
+        },
+
+        "/settings/get-settings": {
+            "get": {
+                "x-controller-name": "SettingsController",
+                "x-operation-name": "GetSettings",
+                "tags": ["SettingsController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetSettings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [],
+                "operationId": "SettingsController.GetSettings"
             }
         }
     },
