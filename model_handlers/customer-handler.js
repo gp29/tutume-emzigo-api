@@ -525,6 +525,12 @@ const updateJob = async(requestParam) => {
                 reject(errors(labels.LBL_DELIVERY_OPTION_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
+            if(requestParam.coupon_id && requestParam.coupon_id !== ''){
+                let coupon = await query.selectWithAndOne(dbConstants.dbSchema.coupons, {coupon_id:requestParam.coupon_id}, { _id:0, coupon_id: 1, total_used:1} );
+                if(coupon){
+                    await query.updateSingle(dbConstants.dbSchema.coupons, {$inc:{total_used: 1}}, {coupon_id: requestParam.coupon_id});
+                }
+            }
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
