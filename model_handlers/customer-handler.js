@@ -645,8 +645,8 @@ const getCurrentDelivery = async(requestParam) => {
                 if(elem.delivery_option_code == '4H'){
                     dt = moment(new Date(elem.pickup_from)).add(4, 'hours');
                 }
-                if(elem.delivery_option_code == 'SAME_WEEK'){
-                    dt = moment().endOf('week')
+                if(elem.delivery_option_code == 'SAME_DAY'){
+                    dt = moment(new Date(elem.pickup_from))
                 }
                 elem.deliver_date = timeZone(new Date(dt)).tz(requestParam.time_zone).format('YYYY-MM-DD')
                 elem.deliver_time = timeZone(new Date(dt)).tz(requestParam.time_zone).format('LT')
