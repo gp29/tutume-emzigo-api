@@ -121,6 +121,7 @@ router.post('/signup', async(req, res) => {
 
 router.post('/signin', async(req, res) => {
     try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
         req.body.time_zone = config.time_zone
         if(req.headers.time_zone){
             req.body.time_zone = req.headers.time_zone
@@ -139,6 +140,7 @@ router.post('/signin', async(req, res) => {
 
 router.get('/get-profile', async(req, res) => {
     try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
         req.query.time_zone = config.time_zone
         if(req.headers.time_zone){
             req.query.time_zone = req.headers.time_zone
