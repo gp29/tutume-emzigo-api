@@ -59,6 +59,50 @@
                 "operationId": "CustomerController.Signup"
             }
         },
+        "/customer/update-profile": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "Update",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "Update",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "customer_id": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "profile_photo": {
+                                        "type": "file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.Update"
+            }
+        },
         "/customer/signin": {
             "post": {
                 "x-controller-name": "CustomerController",
