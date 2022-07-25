@@ -181,7 +181,7 @@ router.post('/change-password', async(req, res) => {
             return
         }
         let response = await customerHandler.changePassword(req.body);
-        jsonResponse(res, responseCodes.OK, null, await encryptDecryptHandler.encrypt(response));
+        jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
@@ -195,7 +195,7 @@ router.post('/logout-delete', async(req, res) => {
             return
         }
         let response = await customerHandler.logoutDelete(req.body);
-        jsonResponse(res, responseCodes.OK, null, await encryptDecryptHandler.encrypt(response));
+        jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
