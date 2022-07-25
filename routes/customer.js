@@ -131,6 +131,7 @@ router.post('/signin', async(req, res) => {
         let response = await customerHandler.signin(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
+        console.log(error)
         jsonResponse(res, error.code, error, null);
     }
 });
