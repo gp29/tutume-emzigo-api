@@ -580,7 +580,84 @@ const getCurrentDelivery = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            resolve(await encryptDecryptHandler.encrypt(coupon));
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehicleDetails',
+                },
+            }, {
+                $unwind: "$vehicleDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delOptionDetails',
+                },
+            }, {
+                $unwind: "$delOptionDetails"
+            }, { 
+                $match : {customer_id: requestParam.customer_id, status:{$nin: ['cancelled', 'delivered']}}
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    customer_id: 1,
+                    job_id: 1,
+                    vehicle_id: 1,
+                    delivery_option_id: 1,
+                    pickup_from: 1,
+                    pickup_landmark: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_landmark: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    pickup_contact_name: 1,
+                    pickup_contact_number: 1,
+                    pickup_instructions: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    item_authority: 1,
+                    accepted_at: 1,
+                    pickedup_at: 1,
+                    delivered_at: 1,
+                    status: 1,
+                    vehicle_name:"$vehicleDetails.name",
+                    delivery_option_name:"$delOptionDetails.name",
+                    delivery_option_code:"$delOptionDetails.code",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.deliver_date = ''
+                elem.deliver_time = ''
+                let dt;
+                if(elem.delivery_option_code == '2H'){
+                    dt = moment(new Date(elem.pickup_from)).add(2, 'hours');
+                }
+                if(elem.delivery_option_code == '4H'){
+                    dt = moment(new Date(elem.pickup_from)).add(4, 'hours');
+                }
+                if(elem.delivery_option_code == 'SAME_WEEK'){
+                    dt = moment().endOf('week')
+                }
+                elem.deliver_date = timeZone(new Date(dt)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                elem.deliver_time = timeZone(new Date(dt)).tz(requestParam.time_zone).format('LT')
+
+                elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+                elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.accepted_at = elem.accepted_at ? timeZone(new Date(elem.accepted_at)).tz(requestParam.time_zone).format('lll') : ''
+
+                delete elem.delivery_option_code
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
             return;
         } catch (error) {
             console.log(error)

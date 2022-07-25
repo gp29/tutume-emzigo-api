@@ -223,7 +223,7 @@ router.post('/create-job', async(req, res) => {
     }
 });
 
-router.post('/get-current-deliveries', async(req, res) => {
+router.get('/get-current-deliveries', async(req, res) => {
     try {
         req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
         req.query.time_zone = config.time_zone

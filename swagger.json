@@ -495,6 +495,37 @@
                 "operationId": "CustomerController.ApplyCoupon"
             }
         },
+        "/customer/get-current-deliveries": {
+            "get": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "GetCurrentDeliveries",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetCurrentDeliveries",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "customer_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "CustomerController.GetCurrentDeliveries"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
