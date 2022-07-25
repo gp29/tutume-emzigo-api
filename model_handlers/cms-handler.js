@@ -187,7 +187,7 @@ const list = async(requestParam) => {
             await Promise.all(response.map(async (elem) => {
                 elem.link = elem.link != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/cms/${elem.link}`}) : ''
             }))
-            resolve({});
+            resolve(response);
             return;
         } catch (error) {
             reject(error)
