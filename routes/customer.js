@@ -178,6 +178,10 @@ router.get('/check-price', async(req, res) => {
 router.post('/apply-coupon', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
         if (!req.body.customer_id || !req.body.coupon_code) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
