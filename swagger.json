@@ -472,7 +472,7 @@
                 "operationId": "VehicleController.List"
             }
         },
-        "/delivry-option/list": {
+        "/delivery-option/list": {
             "get": {
                 "x-controller-name": "DeliveryOptionController",
                 "x-operation-name": "List",
