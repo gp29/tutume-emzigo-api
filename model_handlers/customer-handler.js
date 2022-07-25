@@ -270,6 +270,9 @@ const updateProfile = async(requestParam, req) => {
             if(requestParam.mobile) delete requestParam.mobile
             if(requestParam.mobile_country_code) delete requestParam.mobile_country_code
 
+            if(requestParam.customer_id){
+                requestParam.customer_id = await encryptDecryptHandler.decryptString(requestParam.customer_id)
+            }
             if(requestParam.name){
                 requestParam.name = await encryptDecryptHandler.decryptString(requestParam.name)
             }
