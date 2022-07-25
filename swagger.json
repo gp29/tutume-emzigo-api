@@ -813,6 +813,39 @@
                 "parameters": [],
                 "operationId": "SettingsController.GetSettings"
             }
+        },
+
+        "/cms/list": {
+            "get": {
+                "x-controller-name": "CmsController",
+                "x-operation-name": "GetCmsList",
+                "tags": ["CmsController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetCmsList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "type",
+                    "in": "query",
+                    "schema": {
+                        "type": "string",
+                        "enum": ["customer", "provider"]
+                    }
+                }],
+                "operationId": "CmsController.GetCmsList"
+            }
         }
     },
     "components": {},

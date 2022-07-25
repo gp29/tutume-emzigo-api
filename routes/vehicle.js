@@ -7,8 +7,8 @@ const errors = require('./../utils/dz-errors');
 const express = require('express');
 const router = express.Router();
 const labels = require('./../utils/labels.json')
-const vehicleHandler = require('./../model_handlers/vehicle-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
+const vehicleHandler = require('./../model_handlers/vehicle-handler');
 
 router.post('/create', async(req, res) => {
     try {

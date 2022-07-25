@@ -180,10 +180,27 @@ const action = async(requestParam) => {
     })
 };
 
+const list = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAnd(dbConstants.dbSchema.cms, {type: requestParam.type}, { _id: 0, created_at:0, updated_at:0, __v:0}, { created_at: 1 });
+            await Promise.all(response.map(async (elem) => {
+                elem.link = elem.link != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/cms/${elem.link}`}) : ''
+            }))
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
     create,
     update,
-    action
+    action,
+    list
 };
