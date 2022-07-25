@@ -129,6 +129,14 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    collect_cash_from:{
+        type: String,
+        default:''
+    },
+    payment_type: {
+        type: String,
+        default:'cash'
+    },
     status: {
         type: String,
         default:'new'

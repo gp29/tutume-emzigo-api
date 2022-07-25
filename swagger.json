@@ -434,6 +434,14 @@
                                     "amount_pay": {
                                         "type": "string"
                                     },
+                                    "payment_type": {
+                                        "type": "string",
+                                        "enum": ["cash", "online"]
+                                    },
+                                    "collect_cash_from": {
+                                        "type": "string",
+                                        "description": "While payment_type=cash"
+                                    },
                                     "coupon_id": {
                                         "type": "string",
                                         "description": "Optional=> If applied"
