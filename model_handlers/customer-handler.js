@@ -572,6 +572,24 @@ const applyCoupon = async(requestParam) => {
     })
 };
 
+const getCurrentDelivery = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            resolve(await encryptDecryptHandler.encrypt(coupon));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -590,4 +608,5 @@ module.exports = {
     changePassword,
     logoutDelete,
     applyCoupon,
+    getCurrentDelivery,
 };
