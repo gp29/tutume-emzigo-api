@@ -6,17 +6,17 @@
         "description": "Tutume E-mzigo"
     },
     "paths": {
-        "/rider/signin": {
+        "/customer/signup": {
             "post": {
-                "x-controller-name": "RiderController",
-                "x-operation-name": "SignIn",
-                "tags": ["RiderController"],
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "Signup",
+                "tags": ["CustomerController"],
                 "security": [{
                     "jwt": []
                 }],
                 "responses": {
                     "200": {
-                        "description": "SignIn",
+                        "description": "Signup",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -33,25 +33,37 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "mobile_country_code": {
+                                        "type": "string"
+                                    },
                                     "mobile": {
                                         "type": "string"
                                     },
                                     "password": {
                                         "type": "string"
+                                    },
+                                    "profile_photo": {
+                                        "type": "file"
                                     }
                                 }
                             }
                         }
                     }
                 },
-                "operationId": "RiderController.SignIn"
+                "operationId": "CustomerController.Signup"
             }
         },
         "/rider/new-trips": {
             "get": {
-                "x-controller-name": "RiderController",
+                "x-controller-name": "CustomerController",
                 "x-operation-name": "NewTrips",
-                "tags": ["RiderController"],
+                "tags": ["CustomerController"],
                 "security": [{
                     "jwt": []
                 }],
@@ -81,7 +93,7 @@
                         "type": "number"
                     }
                 }],
-                "operationId": "RiderController.NewTrips"
+                "operationId": "CustomerController.NewTrips"
             }
         }
     },

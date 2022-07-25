@@ -14,6 +14,7 @@ const imgHandler = require('./../model_handlers/image-handler');
 const distance = require('google-distance');
 distance.apiKey = config.google_key;
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
+const passwordHandler = require('./../utils/password-handler');
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -210,6 +211,58 @@ const action = async(requestParam) => {
 };
 
 // FOR API
+
+const signup = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if(requestParam.name){
+                requestParam.name = await encryptDecryptHandler.decryptString(requestParam.name)
+            }
+            if(requestParam.email){
+                requestParam.email = await encryptDecryptHandler.decryptString(requestParam.email)
+            }
+            if(requestParam.password){
+                requestParam.password = await encryptDecryptHandler.decryptString(requestParam.password)
+            }
+            if(requestParam.mobile_country_code){
+                requestParam.mobile_country_code = await encryptDecryptHandler.decryptString(requestParam.mobile_country_code)
+            }
+            if(requestParam.mobile){
+                requestParam.mobile = await encryptDecryptHandler.decryptString(requestParam.mobile)
+            }
+
+            requestParam.email = requestParam.email.trim();
+            let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
+            let compareColumnAndValues = {
+                 $or: [{
+                    email: regexEmail
+                }, {
+                    mobile: requestParam.mobile,
+                    mobile_country_code: requestParam.mobile_country_code,
+                }]
+            };
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, compareColumnAndValues, { _id: 0, customer_id:1}, { created_at: 1 });
+            if(response){
+                reject(errors(labels.LBL_EMAIL_OR_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(req.files){
+                if(req.files.profile_photo){
+                    requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.customerBucket)
+                }
+            }
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString())
+            await query.insertSingle(dbConstants.dbSchema.customers, requestParam);
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const checkPrice = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -346,6 +399,7 @@ module.exports = {
     action,
 
     // FOR API
+    signup,
     checkPrice,
     createJob,
     updateJob,
