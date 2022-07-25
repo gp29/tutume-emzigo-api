@@ -454,6 +454,144 @@
                 "operationId": "CustomerController.CreateJob"
             }
         },
+        "/customer/update-job": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "UpdateJob",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "UpdateJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "job_id": {
+                                        "type": "string"
+                                    },
+                                    "customer_id": {
+                                        "type": "string"
+                                    },
+                                    "vehicle_id": {
+                                        "type": "string"
+                                    },
+                                    "delivery_option_id": {
+                                        "type": "string"
+                                    },
+                                    "pickup_from": {
+                                        "type": "string"
+                                    },
+                                    "pickup_landmark": {
+                                        "type": "string"
+                                    },
+                                    "pickup_address": {
+                                        "type": "string"
+                                    },
+                                    "pickup_latitude": {
+                                        "type": "string"
+                                    },
+                                    "pickup_longitude": {
+                                        "type": "string"
+                                    },
+                                    "delivery_landmark": {
+                                        "type": "string"
+                                    },
+                                    "delivery_address": {
+                                        "type": "string"
+                                    },
+                                    "delivery_latitude": {
+                                        "type": "string"
+                                    },
+                                    "delivery_longitude": {
+                                        "type": "string"
+                                    },
+                                    "total_distance": {
+                                        "type": "string"
+                                    },
+                                    "total_duration": {
+                                        "type": "string"
+                                    },
+                                    "formatted_distance": {
+                                        "type": "string"
+                                    },
+                                    "formatted_duration": {
+                                        "type": "string"
+                                    },
+                                    "pickup_contact_name": {
+                                        "type": "string"
+                                    },
+                                    "pickup_contact_number": {
+                                        "type": "string"
+                                    },
+                                    "pickup_instructions": {
+                                        "type": "string"
+                                    },
+                                    "delivery_contact_name": {
+                                        "type": "string"
+                                    },
+                                    "delivery_contact_number": {
+                                        "type": "string"
+                                    },
+                                    "delivery_instructions": {
+                                        "type": "string"
+                                    },
+                                    "item_name": {
+                                        "type": "string"
+                                    },
+                                    "item_desc": {
+                                        "type": "string"
+                                    },
+                                    "item_authority": {
+                                        "type": "string",
+                                        "enum": ["driver_authority", "check_recipient_id", "item_fragile"]
+                                    },
+                                    "delivery_instructions": {
+                                        "type": "string"
+                                    },
+                                    "total": {
+                                        "type": "string"
+                                    },
+                                    "discount": {
+                                        "type": "string"
+                                    },
+                                    "amount_pay": {
+                                        "type": "string"
+                                    },
+                                    "payment_type": {
+                                        "type": "string",
+                                        "enum": ["cash", "online"]
+                                    },
+                                    "collect_cash_from": {
+                                        "type": "string",
+                                        "description": "While payment_type=cash"
+                                    },
+                                    "coupon_id": {
+                                        "type": "string",
+                                        "description": "Optional=> If applied"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.UpdateJob"
+            }
+        },
         "/customer/apply-coupon": {
             "post": {
                 "x-controller-name": "CustomerController",
