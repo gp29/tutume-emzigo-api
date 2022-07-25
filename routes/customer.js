@@ -4,6 +4,7 @@ const responseCodes = require('./../utils/response-codes');
 const jsonResponse = require('./../utils/json-response');
 const express = require('express');
 const router = express.Router();
+const config = require('./../config');
 const customerHandler = require('./../model_handlers/customer-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 const labels = require('./../utils/labels.json')
@@ -110,7 +111,58 @@ router.post('/signup', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        let response = await customerHandler.signup(req.body);
+        let response = await customerHandler.signup(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/signin', async(req, res) => {
+    try {
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
+        if (!req.body.mobile_country_code || !req.body.mobile || !req.body.password) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.signin(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.get('/get-profile', async(req, res) => {
+    try {
+        req.query.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.query.time_zone = req.headers.time_zone
+        }
+        if (!req.query.customer_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.profile(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/update-profile', async(req, res) => {
+    try {
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
+        if (!req.body.customer_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.updateProfile(req.body, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

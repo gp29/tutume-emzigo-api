@@ -263,6 +263,72 @@ const signup = async(requestParam, req) => {
     })
 };
 
+const updateProfile = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if(requestParam.email) delete requestParam.email
+            if(requestParam.mobile) delete requestParam.mobile
+            if(requestParam.mobile_country_code) delete requestParam.mobile_country_code
+
+            if(requestParam.name){
+                requestParam.name = await encryptDecryptHandler.decryptString(requestParam.name)
+            }
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1, profile_photo:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(req.files && req.files.profile_photo){
+                const objects = [{
+                    Key: `emzigo/customers/${response.profile_photo}`
+                }];
+                await imgHandler.deleteImage(objects, config.aws.bucketName)
+                requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.customerBucket)
+            }
+            await query.updateSingle(dbConstants.dbSchema.customers, requestParam, {customer_id: requestParam.customer_id});
+            resolve(profile({customer_id: requestParam.customer_id, time_zone: requestParam.time_zone}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const signin = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {mobile_country_code:requestParam.mobile_country_code, mobile: requestParam.mobile}, { _id:0, customer_id: 1, password:1, name:1, email:1, status:1} );
+            if(!response){
+                reject(errors(labels.LBL_MOBILE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            if(response.status == 'inactive'){
+                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            let encryptPassword = await passwordHandler.encrypt(requestParam.password.toString());
+            if(encryptPassword != response.password){
+                reject(errors(labels.LBL_INVALID_PWD[config.default_language], responseCodes.InvalidOTP));
+                return;
+            }
+            let updateColumn = {updated_at: new Date()}
+            if(requestParam.device_token){
+                updateColumn.device_token = requestParam.updateColumn
+            }
+            await query.updateSingle(dbConstants.dbSchema.customers, updateColumn, {customer_id: response.customer_id});
+            resolve(profile({customer_id: response.customer_id, time_zone: requestParam.time_zone}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const profile = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -424,6 +490,9 @@ module.exports = {
 
     // FOR API
     signup,
+    signin,
+    updateProfile,
+    profile,
     checkPrice,
     createJob,
     updateJob,
