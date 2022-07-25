@@ -695,6 +695,47 @@
                 "operationId": "CustomerController.DeliveryHistory"
             }
         },
+        "/customer/cancel-job": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "CancelJob",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "CancelJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "customer_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.CancelJob"
+            }
+        },
 
         "/vehicle/list": {
             "get": {

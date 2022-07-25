@@ -761,6 +761,34 @@ const deliveryHistory = async(requestParam) => {
     })
 };
 
+const cancelJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(job.status != 'new'){
+                reject(errors(labels.LBL_YOU_CAN_NOT_CANCEL_JOB[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'cancelled'}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -781,4 +809,5 @@ module.exports = {
     applyCoupon,
     getCurrentDelivery,
     deliveryHistory,
+    cancelJob,
 };

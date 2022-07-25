@@ -49,5 +49,8 @@
     },
     "LBL_DISTANCE_NOT_FOUND": {
         "EN": "Google API key was expired or didn't found distace on addresses."
+    },
+    "LBL_YOU_CAN_NOT_CANCEL_JOB": {
+        "EN": "You can't cancel this job now."
     }
 }
