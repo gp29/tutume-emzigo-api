@@ -173,4 +173,32 @@ router.post('/update-profile', async(req, res) => {
     }
 });
 
+router.post('/change-password', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.mobile_country_code || !req.body.mobile || !req.body.password) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.changePassword(req.body);
+        jsonResponse(res, responseCodes.OK, null, await encryptDecryptHandler.encrypt(response));
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/logout-delete', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.customer_id || !req.body.type) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.logoutDelete(req.body);
+        jsonResponse(res, responseCodes.OK, null, await encryptDecryptHandler.encrypt(response));
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

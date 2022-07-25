@@ -353,6 +353,56 @@ const profile = async(requestParam) => {
     })
 };
 
+const changePassword = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {mobile_country_code:requestParam.mobile_country_code, mobile: requestParam.mobile}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_MOBILE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let password = await passwordHandler.encrypt(requestParam.password.toString());
+            await query.updateSingle(dbConstants.dbSchema.customers, {password}, {customer_id: response.customer_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const logoutDelete = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if(requestParam.type == 'logout'){
+                await query.updateSingle(dbConstants.dbSchema.customers, {device_token:''}, { customer_id: requestParam.customer_id });
+            }
+            if(requestParam.type == 'delete'){
+                let user = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id: requestParam.customer_id}, { _id:0, profile_photo: 1});
+                let objects = []
+                if(user){
+                    if(user.profile_photo != ''){
+                        objects.push({
+                            Key: `emzigo/customers/${user.profile_photo}`
+                        })
+                    }
+                    if(objects.length > 0){
+                        await imgHandler.deleteImage(objects, config.aws.bucketName)
+                    }
+                }
+                await query.removeMultiple(dbConstants.dbSchema.customers, {customer_id: requestParam.customer_id})
+            }
+            resolve(await encryptDecryptHandler.encrypt({}))
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const checkPrice = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -496,4 +546,6 @@ module.exports = {
     checkPrice,
     createJob,
     updateJob,
+    changePassword,
+    logoutDelete,
 };
