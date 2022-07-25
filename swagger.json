@@ -59,17 +59,61 @@
                 "operationId": "CustomerController.Signup"
             }
         },
-        "/rider/new-trips": {
-            "get": {
+        "/customer/signin": {
+            "post": {
                 "x-controller-name": "CustomerController",
-                "x-operation-name": "NewTrips",
+                "x-operation-name": "Signin",
                 "tags": ["CustomerController"],
                 "security": [{
                     "jwt": []
                 }],
                 "responses": {
                     "200": {
-                        "description": "NewTrips",
+                        "description": "Signin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mobile_country_code": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.Signin"
+            }
+        },
+        "/customer/get-profile": {
+            "get": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "GetProfile",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetProfile",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -81,19 +125,13 @@
                     }
                 },
                 "parameters": [{
-                    "name": "rider_id",
+                    "name": "customer_id",
                     "in": "query",
                     "schema": {
                         "type": "string"
                     }
-                }, {
-                    "name": "page",
-                    "in": "query",
-                    "schema": {
-                        "type": "number"
-                    }
                 }],
-                "operationId": "CustomerController.NewTrips"
+                "operationId": "CustomerController.GetProfile"
             }
         }
     },
