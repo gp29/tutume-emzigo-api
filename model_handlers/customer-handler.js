@@ -667,6 +667,88 @@ const getCurrentDelivery = async(requestParam) => {
     })
 };
 
+const deliveryHistory = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehicleDetails',
+                },
+            }, {
+                $unwind: "$vehicleDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delOptionDetails',
+                },
+            }, {
+                $unwind: "$delOptionDetails"
+            }, { 
+                $match : {customer_id: requestParam.customer_id, status:{$in: ['cancelled', 'delivered']}}
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    customer_id: 1,
+                    job_id: 1,
+                    vehicle_id: 1,
+                    delivery_option_id: 1,
+                    pickup_from: 1,
+                    pickup_landmark: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_landmark: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    pickup_contact_name: 1,
+                    pickup_contact_number: 1,
+                    pickup_instructions: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    item_authority: 1,
+                    accepted_at: 1,
+                    pickedup_at: 1,
+                    delivered_at: 1,
+                    status: 1,
+                    vehicle_name:"$vehicleDetails.name",
+                    delivery_option_name:"$delOptionDetails.name",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                if(elem.status == 'cancelled'){
+                    elem.delivered_at = elem.pickup_from
+                }
+                elem.deliver_date = timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                elem.deliver_time = timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('LT')
+
+                elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -686,4 +768,5 @@ module.exports = {
     logoutDelete,
     applyCoupon,
     getCurrentDelivery,
+    deliveryHistory,
 };

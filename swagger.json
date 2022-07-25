@@ -526,6 +526,37 @@
                 "operationId": "CustomerController.GetCurrentDeliveries"
             }
         },
+        "/customer/delivery-history": {
+            "get": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "DeliveryHistory",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "DeliveryHistory",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "customer_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "CustomerController.DeliveryHistory"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
