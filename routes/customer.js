@@ -55,6 +55,7 @@ router.post('/update', async(req, res) => {
     }
 });
 
+// APIS
 router.get('/check-price', async(req, res) => {
     try {
         req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
@@ -76,6 +77,10 @@ router.get('/check-price', async(req, res) => {
 router.post('/create-job', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
         if (!req.body.customer_id || !req.body.vehicle_id || !req.body.delivery_option_id || !req.body.pickup_from || !req.body.item_name || !req.body.item_desc) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
@@ -97,6 +102,10 @@ router.post('/create-job', async(req, res) => {
 
 router.post('/signup', async(req, res) => {
     try {
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
         if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password || !req.files.profile_photo) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return

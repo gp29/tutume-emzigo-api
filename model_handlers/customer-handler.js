@@ -252,8 +252,32 @@ const signup = async(requestParam, req) => {
                 }
             }
             requestParam.password = await passwordHandler.encrypt(requestParam.password.toString())
-            await query.insertSingle(dbConstants.dbSchema.customers, requestParam);
-            resolve(await encryptDecryptHandler.encrypt({}));
+            let res = await query.insertSingle(dbConstants.dbSchema.customers, requestParam);
+            resolve(profile({customer_id: res.customer_id, time_zone: requestParam.time_zone}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const profile = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1, name:1, email:1, mobile_country_code:1, mobile:1, profile_photo:1, status:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            if(response.status == 'inactive'){
+                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            response.profile_photo = response.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${response.profile_photo}`}) : ''
+            resolve(await encryptDecryptHandler.encrypt(response));
             return;
         } catch (error) {
             console.log(error)
