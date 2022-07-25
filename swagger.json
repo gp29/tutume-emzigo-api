@@ -263,6 +263,57 @@
                 },
                 "operationId": "CustomerController.ChangePassword"
             }
+        },
+
+        "/vehicle/list": {
+            "get": {
+                "x-controller-name": "VehicleController",
+                "x-operation-name": "List",
+                "tags": ["VehicleController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "List",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [],
+                "operationId": "VehicleController.List"
+            }
+        },
+        "/delivry-option/list": {
+            "get": {
+                "x-controller-name": "DeliveryOptionController",
+                "x-operation-name": "List",
+                "tags": ["DeliveryOptionController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "List",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [],
+                "operationId": "DeliveryOptionController.List"
+            }
         }
     },
     "components": {},

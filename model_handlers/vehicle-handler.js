@@ -21,13 +21,16 @@ const get = async(requestParam) => {
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
-            let response = await query.selectWithAnd(dbConstants.dbSchema.vehicles, columnValue, { _id: 0}, { created_at: 1 });
+            let response = await query.selectWithAnd(dbConstants.dbSchema.vehicles, columnValue, { _id: 0, created_at:0, updated_at:0, __v:0}, { created_at: 1 });
             if(requestParam.vehicle_id){
                 response = response[0]
                 response.icon = response.icon != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/vehicles/${response.icon}`}) : ''
                 resolve(response);
                 return;
             }
+            await Promise.all(response.map(async (elem) => {
+                elem.icon = elem.icon != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/vehicles/${elem.icon}`}) : ''
+            }))
             resolve(response);
             return;
         } catch (error) {

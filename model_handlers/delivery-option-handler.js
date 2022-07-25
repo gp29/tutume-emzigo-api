@@ -20,7 +20,7 @@ const get = async(requestParam) => {
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
-            let response = await query.selectWithAnd(dbConstants.dbSchema.delivery_options, columnValue, { _id: 0}, { created_at: 1 });
+            let response = await query.selectWithAnd(dbConstants.dbSchema.delivery_options, columnValue, { _id: 0, created_at:0, updated_at:0, __v:0}, { created_at: 1 });
             if(requestParam.delivery_option_id){
                 response = response[0]
                 resolve(response);

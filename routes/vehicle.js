@@ -2,9 +2,13 @@
 
 const responseCodes = require('./../utils/response-codes');
 const jsonResponse = require('./../utils/json-response');
+const config = require('./../config');
+const errors = require('./../utils/dz-errors');
 const express = require('express');
 const router = express.Router();
+const labels = require('./../utils/labels.json')
 const vehicleHandler = require('./../model_handlers/vehicle-handler');
+const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 
 router.post('/create', async(req, res) => {
     try {
@@ -48,6 +52,18 @@ router.post('/update', async(req, res) => {
         let requestParam = JSON.parse(req.body.fields);
         let response = await vehicleHandler.update(requestParam, req);
         jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+// API
+router.get('/list', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        req.query.status = 'active'
+        let response = await vehicleHandler.get(req.query);
+        jsonResponse(res, responseCodes.OK, null, await encryptDecryptHandler.encrypt(response));
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
