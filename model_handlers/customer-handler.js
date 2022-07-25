@@ -761,6 +761,62 @@ const deliveryHistory = async(requestParam) => {
     })
 };
 
+const recentlyShipped = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let skip = 0
+            let limit = 5
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let joinArr = [{
+                $lookup: {
+                    from: 'providers',
+                    localField: 'provider_id',
+                    foreignField: 'provider_id',
+                    as: 'proDetails',
+                },
+            }, {
+                $unwind: "$proDetails"
+            }, { 
+                $match : {customer_id: requestParam.customer_id, status:'delivered'}
+            }, { 
+                $sort : {created_at: -1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: limit
+            }, {
+                $project: {
+                    _id: 0,
+                    job_id: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    delivered_at: 1,
+                    provider_name: "$proDetails.name",
+                    provider_photo: "$proDetails.profile_photo",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.deliver_date = timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                elem.deliver_time = timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('LT')
+                elem.provider_photo = elem.provider_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/providers/${elem.provider_photo}`}) : ''
+                delete elem.delivered_at
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const cancelJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -810,4 +866,5 @@ module.exports = {
     getCurrentDelivery,
     deliveryHistory,
     cancelJob,
+    recentlyShipped,
 };

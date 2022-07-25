@@ -736,6 +736,37 @@
                 "operationId": "CustomerController.CancelJob"
             }
         },
+        "/customer/recently-shipped": {
+            "get": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "RecentlyShipped",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "RecentlyShipped",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "customer_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "CustomerController.RecentlyShipped"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
