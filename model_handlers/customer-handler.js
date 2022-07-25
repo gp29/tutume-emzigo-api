@@ -10,6 +10,7 @@ const _ = require('underscore');
 const labels = require('./../utils/labels.json');
 const responseCodes = require('./../utils/response-codes');
 const timeZone = require('moment-timezone');
+const moment = require('moment');
 const imgHandler = require('./../model_handlers/image-handler');
 const distance = require('google-distance');
 distance.apiKey = config.google_key;
@@ -128,6 +129,7 @@ const create = async(requestParam, req) => {
                     requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.customerBucket)
                 }
             }
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString())
             await query.insertSingle(dbConstants.dbSchema.customers, requestParam);
             resolve({});
             return;
@@ -534,6 +536,42 @@ const updateJob = async(requestParam) => {
     })
 };
 
+const appleCoupon = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let coupon = await query.selectWithAndOne(dbConstants.dbSchema.coupons, { coupon_code: requestParam.coupon_code, status:'active'}, {_id:0, created_at:0, updated_at:0, __v:0});
+            if(!coupon){
+                reject(errors(labels.LBL_COUPON_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let todayDate = timeZone(new Date()).tz(requestParam.time_zone).format('YYYY-MM-DD');
+            if(moment(todayDate).isBetween(coupon.start_date, coupon.end_date, null, '[]')){
+                if(coupon.total_used >= coupon.total_usage){
+                    reject(errors(labels.LBL_COUPON_EXPIRED[config.default_language], responseCodes.ResourceNotFound));
+                    return;
+                }
+                else{
+                    resolve(await encryptDecryptHandler.encrypt(coupon));
+                    return;
+                }
+            }
+            else{
+                reject(errors(labels.LBL_COUPON_EXPIRED[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -551,4 +589,5 @@ module.exports = {
     updateJob,
     changePassword,
     logoutDelete,
+    appleCoupon,
 };

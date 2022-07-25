@@ -41,6 +41,12 @@
     "LBL_JOB_NOT_FOUND": {
         "EN": "Job not exists in our system"
     },
+    "LBL_COUPON_NOT_FOUND": {
+        "EN": "Coupon code not available at this time."
+    },
+    "LBL_COUPON_EXPIRED": {
+        "EN": "Coupon code expired."
+    },
     "LBL_DISTANCE_NOT_FOUND": {
         "EN": "Google API key was expired or didn't found distace on addresses."
     }

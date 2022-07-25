@@ -12,6 +12,7 @@ const timeZone = require('moment-timezone');
 const imgHandler = require('./../model_handlers/image-handler');
 const FCM = require('fcm-push');
 let fcm = new FCM(config.push_key);
+const passwordHandler = require('./../utils/password-handler');
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -129,6 +130,7 @@ const create = async(requestParam, req) => {
                     requestParam.id_photo = await imgHandler.uploadImage(req.files.id_photo, config.aws.s3.providerBucket)
                 }
             }
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString())
             await query.insertSingle(dbConstants.dbSchema.providers, requestParam);
             resolve({});
             return;

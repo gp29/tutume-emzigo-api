@@ -175,6 +175,20 @@ router.get('/check-price', async(req, res) => {
     }
 });
 
+router.post('/apple-coupon', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.customer_id || !req.body.coupon_code) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.appleCoupon(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/create-job', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)

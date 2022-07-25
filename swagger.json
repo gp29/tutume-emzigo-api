@@ -446,6 +446,47 @@
                 "operationId": "CustomerController.CreateJob"
             }
         },
+        "/customer/apple-coupon": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "ApplyCoupon",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "ApplyCoupon",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "customer_id": {
+                                        "type": "string"
+                                    },
+                                    "coupon_code": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.ApplyCoupon"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
