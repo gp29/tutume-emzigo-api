@@ -325,4 +325,22 @@ router.post('/cancel-job', async(req, res) => {
     }
 });
 
+router.get('/track-job', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        req.query.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.query.time_zone = req.headers.time_zone
+        }
+        if (!req.query.customer_id || !req.query.job_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.trackJob(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

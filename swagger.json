@@ -767,6 +767,43 @@
                 "operationId": "CustomerController.RecentlyShipped"
             }
         },
+        "/customer/track-job": {
+            "get": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "TrackJob",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "TrackJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "customer_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "job_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "CustomerController.TrackJob"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
