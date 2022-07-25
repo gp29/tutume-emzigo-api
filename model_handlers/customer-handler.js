@@ -536,7 +536,7 @@ const updateJob = async(requestParam) => {
     })
 };
 
-const appleCoupon = async(requestParam) => {
+const applyCoupon = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
@@ -589,5 +589,5 @@ module.exports = {
     updateJob,
     changePassword,
     logoutDelete,
-    appleCoupon,
+    applyCoupon,
 };

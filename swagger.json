@@ -419,11 +419,11 @@
                                         "type": "string"
                                     },
                                     "item_authority": {
-                                        "type": "string"
-                                    },
-                                    "delivery_instructions": {
                                         "type": "string",
                                         "enum": ["driver_authority", "check_recipient_id", "item_fragile"]
+                                    },
+                                    "delivery_instructions": {
+                                        "type": "string"
                                     },
                                     "total": {
                                         "type": "string"
@@ -454,7 +454,7 @@
                 "operationId": "CustomerController.CreateJob"
             }
         },
-        "/customer/apple-coupon": {
+        "/customer/apply-coupon": {
             "post": {
                 "x-controller-name": "CustomerController",
                 "x-operation-name": "ApplyCoupon",
