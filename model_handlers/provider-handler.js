@@ -552,6 +552,104 @@ const logoutDelete = async(requestParam) => {
     })
 };
 
+const deliveriesForYou = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let matchColumn = {provider_id: requestParam.provider_id, status: 'assigned'}
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delOptDetails',
+                },
+            }, {
+                $unwind: "$delOptDetails"
+            }, { 
+                $match : matchColumn
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    provider_id: 1,
+                    customer_id: 1,
+                    job_id: 1,
+                    vehicle_id: 1,
+                    delivery_option_id: 1,
+                    pickup_from: 1,
+                    pickup_landmark: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_landmark: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    pickup_contact_name: 1,
+                    pickup_contact_number: 1,
+                    pickup_instructions: 1,
+                    delivery_contact_name: 1,
+                    delivery_contact_number: 1,
+                    delivery_instructions: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    item_authority: 1,
+                    status: 1,
+                    formatted_distance: 1,
+                    formatted_duration: 1,
+                    vehicle_name:"$vehicleDetails.name",
+                    delivery_option_name:"$delOptionDetails.name",
+                    delivery_option_code:"$delOptionDetails.code",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.due_in = ''
+                let dt;
+                let todayDate = timeZone(new Date()).tz(requestParam.time_zone);
+                if(elem.delivery_option_code == '2H'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours');
+                }
+                if(elem.delivery_option_code == '4H'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours');
+                }
+                if(elem.delivery_option_code == 'SAME_DAY'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone);
+                }
+                let duration = moment.duration(dt.diff(todayDate));
+                const hours = parseInt(duration.asHours());
+                const minutes = parseInt(duration.asMinutes()) - hours * 60;
+                elem.due_in = hours + "h " + minutes + "m";
+
+                elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+                delete elem.delivery_option_code
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     assignList,
@@ -568,4 +666,5 @@ module.exports = {
     profile,
     changePassword,
     logoutDelete,
+    deliveriesForYou,
 };

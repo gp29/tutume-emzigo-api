@@ -1191,6 +1191,37 @@
                 },
                 "operationId": "ProviderController.ChangePassword"
             }
+        },
+        "/provider/deliveries-for-you": {
+            "get": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "DeliveryForYou",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "DeliveryForYou",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "provider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "ProviderController.DeliveryForYou"
+            }
         }
     },
     "components": {},

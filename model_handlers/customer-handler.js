@@ -649,13 +649,13 @@ const getCurrentDelivery = async(requestParam) => {
                 elem.deliver_time = ''
                 let dt;
                 if(elem.delivery_option_code == '2H'){
-                    dt = moment(new Date(elem.pickup_from)).add(2, 'hours');
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours');
                 }
                 if(elem.delivery_option_code == '4H'){
-                    dt = moment(new Date(elem.pickup_from)).add(4, 'hours');
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours');
                 }
                 if(elem.delivery_option_code == 'SAME_DAY'){
-                    dt = moment(new Date(elem.pickup_from))
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone);
                 }
                 elem.deliver_date = timeZone(new Date(dt)).tz(requestParam.time_zone).format('YYYY-MM-DD')
                 elem.deliver_time = timeZone(new Date(dt)).tz(requestParam.time_zone).format('LT')
