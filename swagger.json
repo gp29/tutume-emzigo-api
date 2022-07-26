@@ -1005,7 +1005,7 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "customer_id": {
+                                    "provider_id": {
                                         "type": "string"
                                     },
                                     "name": {

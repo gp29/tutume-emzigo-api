@@ -38,6 +38,15 @@ router.get('/get', async(req, res) => {
     }
 });
 
+router.get('/assign-list', async(req, res) => {
+    try {
+        let response = await providerHandler.assignList(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/action', async(req, res) => {
     try {
         let response = await providerHandler.action(req.body);

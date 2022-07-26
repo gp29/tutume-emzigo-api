@@ -44,6 +44,41 @@ const get = async(requestParam) => {
     })
 };
 
+const assignList = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, { 
+                $match : {status:'active'}
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    provider_id:1,
+                    name:1,
+                    vehicle:"$vehDetails.name"
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.providers, joinArr);
+            resolve(data);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const getSort = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -445,6 +480,11 @@ const profile = async(requestParam) => {
                 reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
                 return;
             }
+            response.vehicle_name = ''
+            let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.vehicles, {vehicle_id:response.vehicle_id}, { _id:0, name: 1} );
+            if(vehicle){
+                response.vehicle_name = vehicle.name
+            }
             response.profile_photo = response.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/providers/${response.profile_photo}`}) : ''
             response.id_photo = response.id_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/providers/${response.id_photo}`}) : ''
             resolve(await encryptDecryptHandler.encrypt(response));
@@ -514,6 +554,7 @@ const logoutDelete = async(requestParam) => {
 
 module.exports = {
     get,
+    assignList,
     getSort,
     create,
     update,
