@@ -51,7 +51,7 @@ var providerSchema = new Schema({
     },
     status: {
         type: String,
-        default:''
+        default:'active'
     },
     created_at: {
         type: Date,
