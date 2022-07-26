@@ -613,8 +613,8 @@ const deliveriesForYou = async(requestParam) => {
                     formatted_distance: 1,
                     formatted_duration: 1,
                     vehicle_name:"$vehicleDetails.name",
-                    delivery_option_name:"$delOptionDetails.name",
-                    delivery_option_code:"$delOptionDetails.code",
+                    delivery_option_name:"$delOptDetails.name",
+                    delivery_option_code:"$delOptDetails.code",
                 }
             }];
             let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
@@ -772,8 +772,8 @@ const jobList = async(requestParam) => {
                     formatted_duration: 1,
                     pickedup_at: 1,
                     vehicle_name:"$vehicleDetails.name",
-                    delivery_option_name:"$delOptionDetails.name",
-                    delivery_option_code:"$delOptionDetails.code",
+                    delivery_option_name:"$delOptDetails.name",
+                    delivery_option_code:"$delOptDetails.code",
                 }
             }];
             let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
