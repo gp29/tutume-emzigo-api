@@ -622,15 +622,15 @@ const deliveriesForYou = async(requestParam) => {
             await Promise.all(lists.map(async (elem) => {
                 elem.due_in = ''
                 let dt;
-                let todayDate = moment(timeZone(new Date()).tz(requestParam.time_zone));
+                let todayDate = moment(new Date());
                 if(elem.delivery_option_code == '2H'){
-                    dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours'));
+                    dt = moment(new Date(elem.pickup_from)).add(2, 'hours');
                 }
                 if(elem.delivery_option_code == '4H'){
-                    dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours'));
+                    dt = moment(new Date(elem.pickup_from)).add(4, 'hours');
                 }
                 if(elem.delivery_option_code == 'SAME_DAY'){
-                    dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone));
+                    dt = moment(new Date(elem.pickup_from))
                 }
                 let duration = moment.duration(dt.diff(todayDate));
                 const hours = parseInt(duration.asHours());
@@ -779,13 +779,13 @@ const jobList = async(requestParam) => {
                 let dt;
                 let todayDate = timeZone(new Date()).tz(requestParam.time_zone);
                 if(elem.delivery_option_code == '2H'){
-                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours');
+                    dt = moment(new Date(elem.pickup_from)).add(2, 'hours');
                 }
                 if(elem.delivery_option_code == '4H'){
-                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours');
+                    dt = moment(new Date(elem.pickup_from)).add(4, 'hours');
                 }
                 if(elem.delivery_option_code == 'SAME_DAY'){
-                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone);
+                    dt = moment(new Date(elem.pickup_from))
                 }
                 let duration = moment.duration(dt.diff(todayDate));
                 const hours = parseInt(duration.asHours());
