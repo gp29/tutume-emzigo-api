@@ -956,9 +956,9 @@ const getRatingsDeliveries = async(requestParam) => {
 const pickedupJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let instance = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id:1} );
-            if(!instance){
-                reject(errors(labels.LBL_INSTANCE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
             let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
@@ -967,6 +967,53 @@ const pickedupJob = async(requestParam) => {
                 return;
             }
             await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const deliveredJob = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if(requestParam.provider_id){
+                requestParam.provider_id = await encryptDecryptHandler.decryptString(requestParam.provider_id)
+            }
+            if(requestParam.job_id){
+                requestParam.job_id = await encryptDecryptHandler.decryptString(requestParam.job_id)
+            }
+            if(requestParam.delivery_recipient_name){
+                requestParam.delivery_recipient_name = await encryptDecryptHandler.decryptString(requestParam.delivery_recipient_name)
+            }
+            if(requestParam.specified_recipient){
+                requestParam.specified_recipient = await encryptDecryptHandler.decryptString(requestParam.specified_recipient)
+            }
+            if(requestParam.note){
+                requestParam.note = await encryptDecryptHandler.decryptString(requestParam.note)
+            }
+            if(requestParam.is_safe){
+                requestParam.is_safe = await encryptDecryptHandler.decryptString(requestParam.is_safe)
+            }
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(req.files && req.files.signature_proof_image){
+                requestParam.signature_proof_image = await imgHandler.uploadImage(req.files.signature_proof_image, config.aws.s3.providerBucket)
+            }
+            requestParam.status = 'delivered'
+            requestParam.delivered_at = new Date()
+            await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
@@ -1000,4 +1047,5 @@ module.exports = {
     historyList,
     getRatingsDeliveries,
     pickedupJob,
+    deliveredJob,
 };

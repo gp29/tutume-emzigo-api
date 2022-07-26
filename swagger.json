@@ -1485,6 +1485,62 @@
                 },
                 "operationId": "ProviderController.PickedupJob"
             }
+        },
+        "/provider/delivered-job": {
+            "post": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "DeliveredJob",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "DeliveredJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "provider_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    },
+                                    "signature_proof_image": {
+                                        "type": "file"
+                                    },
+                                    "delivery_recipient_name": {
+                                        "type": "string"
+                                    },
+                                    "specified_recipient": {
+                                        "type": "string"
+                                    },
+                                    "note": {
+                                        "type": "string"
+                                    },
+                                    "is_safe": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "ProviderController.DeliveredJob"
+            }
         }
     },
     "components": {},
