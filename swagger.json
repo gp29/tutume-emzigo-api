@@ -1444,6 +1444,47 @@
                 }],
                 "operationId": "ProviderController.GetRatingsDeliveries"
             }
+        },
+        "/provider/pickedup-job": {
+            "post": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "PickedupJob",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "PickedupJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "provider_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "ProviderController.PickedupJob"
+            }
         }
     },
     "components": {},

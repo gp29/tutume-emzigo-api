@@ -612,7 +612,7 @@ const deliveriesForYou = async(requestParam) => {
                     status: 1,
                     formatted_distance: 1,
                     formatted_duration: 1,
-                    vehicle_name:"$vehicleDetails.name",
+                    vehicle_name:"$vehDetails.name",
                     delivery_option_name:"$delOptDetails.name",
                     delivery_option_code:"$delOptDetails.code",
                 }
@@ -623,15 +623,11 @@ const deliveriesForYou = async(requestParam) => {
                 elem.due_in = ''
                 let dt;
                 let todayDate = moment(timeZone(new Date()).tz(requestParam.time_zone));
-                console.log(todayDate)
-                console.log(elem.delivery_option_code)
                 if(elem.delivery_option_code == '2H'){
                     dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours'));
-                    console.log(dt)
                 }
                 if(elem.delivery_option_code == '4H'){
                     dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours'));
-                    console.log(dt)
                 }
                 if(elem.delivery_option_code == 'SAME_DAY'){
                     dt = moment(timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone));
@@ -771,7 +767,7 @@ const jobList = async(requestParam) => {
                     formatted_distance: 1,
                     formatted_duration: 1,
                     pickedup_at: 1,
-                    vehicle_name:"$vehicleDetails.name",
+                    vehicle_name:"$vehDetails.name",
                     delivery_option_name:"$delOptDetails.name",
                     delivery_option_code:"$delOptDetails.code",
                 }
@@ -871,7 +867,7 @@ const historyList = async(requestParam) => {
                     formatted_duration: 1,
                     pickedup_at: 1,
                     delivered_at: 1,
-                    vehicle_name:"$vehicleDetails.name",
+                    vehicle_name:"$vehDetails.name",
                     delivery_option_name:"$delOptionDetails.name",
                 }
             }];
@@ -957,6 +953,30 @@ const getRatingsDeliveries = async(requestParam) => {
     })
 };
 
+const pickedupJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let instance = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id:1} );
+            if(!instance){
+                reject(errors(labels.LBL_INSTANCE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     assignList,
@@ -979,4 +999,5 @@ module.exports = {
     jobList,
     historyList,
     getRatingsDeliveries,
+    pickedupJob,
 };
