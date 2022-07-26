@@ -7,8 +7,8 @@ const router = express.Router();
 const config = require('./../config');
 const labels = require('./../utils/labels.json')
 const errors = require('./../utils/dz-errors');
-const customerHandler = require('./../model_handlers/customer-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
+const customerHandler = require('./../model_handlers/customer-handler');
 
 router.post('/create', async(req, res) => {
     try {

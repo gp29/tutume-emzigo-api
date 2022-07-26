@@ -260,6 +260,20 @@ const action = async(requestParam) => {
     })
 };
 
+const assignProvider = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'assigned', provider_id: requestParam.provider_id}, {job_id: { $in: requestParam['ids']}});
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const getCouponReports = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -321,5 +335,6 @@ module.exports = {
     createJobBackend,
     updateJobBackend,
     action,
+    assignProvider,
     getCouponReports
 };

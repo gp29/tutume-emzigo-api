@@ -60,4 +60,13 @@ router.post('/action', async(req, res) => {
     }
 });
 
+router.post('/assign-provider', async(req, res) => {
+    try {
+        let response = await jobHandler.assignProvider(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;
