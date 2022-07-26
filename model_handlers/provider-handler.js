@@ -868,7 +868,7 @@ const historyList = async(requestParam) => {
                     pickedup_at: 1,
                     delivered_at: 1,
                     vehicle_name:"$vehDetails.name",
-                    delivery_option_name:"$delOptionDetails.name",
+                    delivery_option_name:"$delOptDetails.name",
                 }
             }];
             let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
