@@ -161,6 +161,21 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    decline_reason: {
+        type: Array,
+        default:[]
+    },
+    is_customer_rated: {
+        type: Boolean,
+        default:false
+    },
+    rating: {
+        type: Object,
+        default: {
+            rating: '',
+            comment: ''
+        }
+    },
     accepted_at: {
         type: Date
     },

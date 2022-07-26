@@ -868,6 +868,35 @@ const trackJob = async(requestParam) => {
     })
 };
 
+const rateJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            requestParam.rating = parseFloat(requestParam.rating).toFixed(1)
+            let obj = {rating: requestParam.rating, date: new Date()}
+            if(requestParam.comment){
+                obj.comment = requestParam.comment
+            }
+            await query.updateSingle(dbConstants.dbSchema.jobs, {rating: obj, is_customer_rated:true}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -891,4 +920,5 @@ module.exports = {
     cancelJob,
     recentlyShipped,
     trackJob,
+    rateJob,
 };

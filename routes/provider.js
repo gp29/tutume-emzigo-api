@@ -194,6 +194,20 @@ router.get('/deliveries-for-you', async(req, res) => {
     }
 });
 
+router.post('/decline-job', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.provider_id || !req.body.job_id || !req.body.decline_reason) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await providerHandler.declineJob(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.get('/routes-list', async(req, res) => {
     try {
         req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
@@ -206,6 +220,63 @@ router.get('/routes-list', async(req, res) => {
             return
         }
         let response = await providerHandler.routesList(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.get('/job-list', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        req.query.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.query.time_zone = req.headers.time_zone
+        }
+        if (!req.query.provider_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await providerHandler.jobList(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.get('/history-list', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        req.query.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.query.time_zone = req.headers.time_zone
+        }
+        if (!req.query.provider_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await providerHandler.historyList(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.get('/get-ratings-deliveries', async(req, res) => {
+    try {
+        req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)
+        req.query.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.query.time_zone = req.headers.time_zone
+        }
+        if (!req.query.provider_id || !req.query.type) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await providerHandler.getRatingsDeliveries(req.query);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         console.log(error)

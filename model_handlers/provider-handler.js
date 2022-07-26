@@ -650,6 +650,32 @@ const deliveriesForYou = async(requestParam) => {
     })
 };
 
+const declineJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, decline_reason:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let decline_reason = job.decline_reason
+            decline_reason.push({provider_id: requestParam.provider_id, reason: requestParam.decline_reason})
+            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'new', provider_id:'', decline_reason}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const routesList = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -681,6 +707,252 @@ const routesList = async(requestParam) => {
     })
 };
 
+const jobList = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delOptDetails',
+                },
+            }, {
+                $unwind: "$delOptDetails"
+            }, { 
+                $match : {provider_id: requestParam.provider_id, status: 'pickedup'}
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    provider_id: 1,
+                    customer_id: 1,
+                    job_id: 1,
+                    vehicle_id: 1,
+                    delivery_option_id: 1,
+                    pickup_from: 1,
+                    pickup_landmark: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_landmark: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    pickup_contact_name: 1,
+                    pickup_contact_number: 1,
+                    pickup_instructions: 1,
+                    delivery_contact_name: 1,
+                    delivery_contact_number: 1,
+                    delivery_instructions: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    item_authority: 1,
+                    status: 1,
+                    formatted_distance: 1,
+                    formatted_duration: 1,
+                    pickedup_at: 1,
+                    vehicle_name:"$vehicleDetails.name",
+                    delivery_option_name:"$delOptionDetails.name",
+                    delivery_option_code:"$delOptionDetails.code",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.due_in = ''
+                let dt;
+                let todayDate = timeZone(new Date()).tz(requestParam.time_zone);
+                if(elem.delivery_option_code == '2H'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(2, 'hours');
+                }
+                if(elem.delivery_option_code == '4H'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).add(4, 'hours');
+                }
+                if(elem.delivery_option_code == 'SAME_DAY'){
+                    dt = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone);
+                }
+                let duration = moment.duration(dt.diff(todayDate));
+                const hours = parseInt(duration.asHours());
+                const minutes = parseInt(duration.asMinutes()) - hours * 60;
+                elem.due_in = hours + "h " + minutes + "m";
+
+                elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+                elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
+                delete elem.delivery_option_code
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const historyList = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let joinArr = [{
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delOptDetails',
+                },
+            }, {
+                $unwind: "$delOptDetails"
+            }, { 
+                $match : {provider_id: requestParam.provider_id, status: {$in: ["delivered", "cancelled"]}}
+            }, { 
+                $sort : {delivered_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    provider_id: 1,
+                    customer_id: 1,
+                    job_id: 1,
+                    vehicle_id: 1,
+                    delivery_option_id: 1,
+                    pickup_from: 1,
+                    pickup_landmark: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_landmark: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    pickup_contact_name: 1,
+                    pickup_contact_number: 1,
+                    pickup_instructions: 1,
+                    delivery_contact_name: 1,
+                    delivery_contact_number: 1,
+                    delivery_instructions: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    item_authority: 1,
+                    status: 1,
+                    formatted_distance: 1,
+                    formatted_duration: 1,
+                    pickedup_at: 1,
+                    delivered_at: 1,
+                    vehicle_name:"$vehicleDetails.name",
+                    delivery_option_name:"$delOptionDetails.name",
+                }
+            }];
+            let lists = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+                elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.delivered_at = elem.delivered_at ? timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('lll') : ''
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const getRatingsDeliveries = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let compairData = {
+                provider_id: requestParam.provider_id,
+                status:'delivered'
+            }
+            let start, end;
+            if(requestParam.type == 'TM'){
+                start = moment().startOf('month').toDate();
+                start = moment(start).format('YYYY-MM-DD')
+                end = moment().endOf('month').toDate();
+                end = moment(end).format('YYYY-MM-DD')
+            }
+            if(requestParam.type == 'LM'){
+                start = moment().subtract(1, 'months').startOf('month');
+                start = moment(start).format('YYYY-MM-DD')
+                end = moment().subtract(1, 'months').endOf('month');
+                end = moment(end).format('YYYY-MM-DD')
+            }
+            if(requestParam.type == 'TW'){
+                start = moment().startOf('week').toDate();
+                start = moment(start).format('YYYY-MM-DD')
+                end = moment().endOf('week').toDate();
+                end = moment(end).format('YYYY-MM-DD')
+            }
+            if(requestParam.type == 'LW'){
+                start = moment().subtract(1, 'weeks').startOf('week');
+                start = moment(start).format('YYYY-MM-DD')
+                end = moment().subtract(1, 'weeks').endOf('week');
+                end = moment(end).format('YYYY-MM-DD')
+            }
+            compairData.delivered_at = {
+                $lte: new Date(end + 'T23:59:59.000Z'),
+                $gte: new Date(start + 'T00:00:00.000Z')
+            }
+            let jobs = await query.selectWithAnd(dbConstants.dbSchema.jobs, compairData, {_id:0, job_id:1, is_customer_rated: 1, rating: 1}, {created_at:-1});
+            let rating = 0;
+            let ratingJob = 0;
+            _.each(jobs, (elem) => {
+                if(elem.is_customer_rated == true){
+                    ratingJob += 1
+                    rating += parseFloat(elem.rating.rating)
+                }
+            })
+            let avg_rating = 0
+            if(rating > 0 && ratingJob > 0){
+                avg_rating = parseFloat(rating/ratingJob).toFixed(1)
+            }
+            let obj = {deliveries: jobs.length, rating: avg_rating}
+            resolve(await encryptDecryptHandler.encrypt(obj));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     assignList,
@@ -698,5 +970,9 @@ module.exports = {
     changePassword,
     logoutDelete,
     deliveriesForYou,
+    declineJob,
     routesList,
+    jobList,
+    historyList,
+    getRatingsDeliveries,
 };

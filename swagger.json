@@ -804,6 +804,54 @@
                 "operationId": "CustomerController.TrackJob"
             }
         },
+        "/customer/rate-job": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "RateJob",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "RateJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "customer_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    },
+                                    "rating": {
+                                        "type": "string"
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "description": "Optional"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.RateJob"
+            }
+        },
 
         "/vehicle/list": {
             "get": {
@@ -1223,6 +1271,50 @@
                 "operationId": "ProviderController.DeliveryForYou"
             }
         },
+        "/provider/decline-job": {
+            "post": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "JobDeclined",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "JobDeclined",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "provider_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    },
+                                    "decline_reason": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "ProviderController.JobDeclined"
+            }
+        },
         "/provider/routes-list": {
             "get": {
                 "x-controller-name": "ProviderController",
@@ -1252,6 +1344,105 @@
                     }
                 }],
                 "operationId": "ProviderController.RoutesList"
+            }
+        },
+        "/provider/job-list": {
+            "get": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "JobList",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "JobList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "provider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "ProviderController.JobList"
+            }
+        },
+        "/provider/history-list": {
+            "get": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "HistoryList",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "HistoryList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "provider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "ProviderController.HistoryList"
+            }
+        },
+        "/provider/get-ratings-deliveries": {
+            "get": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "GetRatingsDeliveries",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetRatingsDeliveries",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "provider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "type",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "ProviderController.GetRatingsDeliveries"
             }
         }
     },
