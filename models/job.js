@@ -133,6 +133,10 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    transaction_id: {
+        type: String,
+        default:''
+    },
     payment_type: {
         type: String,
         default:'cash'

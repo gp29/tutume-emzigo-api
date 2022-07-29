@@ -9,6 +9,7 @@ const _ = require('underscore');
 const labels = require('./../utils/labels.json');
 const responseCodes = require('./../utils/response-codes');
 const customerHandler = require('./../model_handlers/customer-handler');
+const imgHandler = require('./../model_handlers/image-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 const timeZone = require('moment-timezone');
 
@@ -166,6 +167,8 @@ const getSort = async(requestParam) => {
                     total: 1,
                     discount: 1,
                     amount_pay: 1,
+                    transaction_id: 1,
+                    payment_type: 1,
                     created_at: 1,
                     delivered_at: 1,
                     item_name: 1,
@@ -201,6 +204,117 @@ const getSort = async(requestParam) => {
             obj.data = data;
             obj.count = count.length;
             resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const details = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {job_id: requestParam.job_id}
+            let joinArr = [{
+                $lookup: {
+                    from: 'customers',
+                    localField: 'customer_id',
+                    foreignField: 'customer_id',
+                    as: 'cusDetails',
+                },
+            }, {
+                $unwind: "$cusDetails"
+            }, {
+                $lookup: {
+                    from: 'providers',
+                    localField: 'provider_id',
+                    foreignField: 'provider_id',
+                    as: 'proDetails',
+                },
+            }, {
+                $unwind: "$proDetails"
+            }, {
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delDetails',
+                },
+            }, {
+                $unwind: "$delDetails"
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    job_id: 1,
+                    pickup_address: 1,
+                    pickup_latitude: 1,
+                    pickup_longitude: 1,
+                    delivery_address: 1,
+                    delivery_latitude: 1,
+                    delivery_longitude: 1,
+                    delivery_option: "$delDetails.name",
+                    created_at:1,
+                    accepted_at:1,
+                    pickedup_at:1,
+                    delivered_at:1,
+                    customer:{
+                        name:"$cusDetails.name",
+                        email:"$cusDetails.email",
+                        mobile: { $concat: [ "$cusDetails.mobile_country_code", " ", "$cusDetails.mobile" ] }
+                    },
+                    provider:{
+                        name:"$proDetails.name",
+                        email:"$proDetails.email",
+                        mobile: { $concat: [ "$proDetails.mobile_country_code", " ", "$proDetails.mobile" ] }
+                    },
+                    formatted_distance:1,
+                    formatted_duration:1,
+                    payment_type:1,
+                    total:1,
+                    amount_pay:1,
+                    discount:1,
+                    signature_proof_image:1,
+                    delivery_recipient_name:1,
+                    specified_recipient:1,
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            if(data.length == 0){
+                resolve({customer:{}, provider:{}});
+                return
+            }
+            let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id: 0, currency:1}, { created_at: 1 });
+            let currency = settings ? settings.currency : 'TZS'
+
+            await Promise.all(data.map(async (elem) => {
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+                elem.accepted_at = elem.accepted_at ? timeZone(new Date(elem.accepted_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll'): ''
+                elem.delivered_at = elem.delivered_at ? timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('lll') : ''
+
+                elem.total = elem.total +' '+ currency
+                elem.discount = elem.discount +' '+ currency
+                elem.amount_pay = elem.amount_pay +' '+ currency
+
+                elem.signature_proof_image = elem.signature_proof_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/providers/${elem.signature_proof_image}`}) : ''
+            }))
+            resolve(data[0]);
             return;
         } catch (error) {
             console.log(error)
@@ -263,7 +377,7 @@ const action = async(requestParam) => {
 const assignProvider = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'accepted', provider_id: requestParam.provider_id}, {job_id: { $in: requestParam['ids']}});
+            await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'accepted', accepted_at:new Date(), provider_id: requestParam.provider_id}, {job_id: { $in: requestParam['ids']}});
             resolve({});
             return;
         } catch (error) {
@@ -332,6 +446,7 @@ const getCouponReports = async(requestParam) => {
 module.exports = {
     get,
     getSort,
+    details,
     createJobBackend,
     updateJobBackend,
     action,

@@ -15,6 +15,15 @@ router.get('/get', async(req, res) => {
     }
 });
 
+router.get('/details', async(req, res) => {
+    try {
+        let response = await jobHandler.details(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/get-sort', async(req, res) => {
     try {
         let response = await jobHandler.getSort(req.body);

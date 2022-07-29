@@ -320,6 +320,65 @@ const sendNotiProvider = async(providers, title) => {
     })
 };
 
+const trips = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let joinArr = [{
+                $lookup: {
+                    from: 'customers',
+                    localField: 'customer_id',
+                    foreignField: 'customer_id',
+                    as: 'cusDetails'
+                }
+            }, {
+                $unwind: "$cusDetails"
+            }, {
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'deliveryOptDetails',
+                },
+            }, {
+                $unwind: "$deliveryOptDetails"
+            }, { 
+                $match : { driver_id: requestParam.driver_id, status: {$nin: ["delivered", "cancelled"]}}
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    job_id: "$job_id",
+                    customer: "$cusDetails.name",
+                    delivery_option: "$deliveryOptDetails.name",
+                    vehicle: "$vehDetails.name",
+                    pickup_address: "$pickup_address",
+                    delivery_address: "$delivery_address",
+                    created_at: "$created_at",
+                    status: "$status",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            resolve(data);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 // FOR API
 
 const signup = async(requestParam, req) => {
@@ -1032,6 +1091,7 @@ module.exports = {
     update,
     action,
     sendNotification,
+    trips,
 
     // FOR API
     signup,

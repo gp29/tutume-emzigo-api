@@ -75,6 +75,15 @@ router.post('/update', async(req, res) => {
     }
 });
 
+router.get('/trips', async(req, res) => {
+    try {
+        let response = await providerHandler.trips(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 // APIS
 router.post('/signup', async(req, res) => {
     try {

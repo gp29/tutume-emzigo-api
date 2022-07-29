@@ -492,6 +492,12 @@ const createJob = async(requestParam) => {
                     await query.updateSingle(dbConstants.dbSchema.coupons, {$inc:{total_used: 1}}, {coupon_id: requestParam.coupon_id});
                 }
             }
+            if(requestParam.amount_pay){
+                requestParam.amount_pay = parseFloat(parseFloat(requestParam.amount_pay).toFixed(2))
+            }
+            if(!requestParam.transaction_id){
+                requestParam.transaction_id = 'TRA'+moment().unix()
+            }
             await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
@@ -530,6 +536,9 @@ const updateJob = async(requestParam) => {
                 if(coupon){
                     await query.updateSingle(dbConstants.dbSchema.coupons, {$inc:{total_used: 1}}, {coupon_id: requestParam.coupon_id});
                 }
+            }
+            if(requestParam.amount_pay){
+                requestParam.amount_pay = parseFloat(parseFloat(requestParam.amount_pay).toFixed(2))
             }
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
             resolve(await encryptDecryptHandler.encrypt({}));
