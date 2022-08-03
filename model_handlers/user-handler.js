@@ -52,7 +52,9 @@ const getSort = async(requestParam) => {
                     mobile: new RegExp(requestParam.text, 'i')
                 }, {
                     status: new RegExp(requestParam.text, 'i')
-                }];
+                }, {
+                    "roleDetails.title": new RegExp(requestParam.text, 'i')
+                }, ];
             }
             let page = requestParam.page ? requestParam.page : 0 ;
             let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
@@ -61,7 +63,16 @@ const getSort = async(requestParam) => {
 
             let count = await query.countRecord(dbConstants.dbSchema.users, columnAndValue);
 
-            let joinArr = [{ 
+            let joinArr = [{
+                $lookup: {
+                    from: 'roles',
+                    localField: 'role_id',
+                    foreignField: 'role_id',
+                    as: 'roleDetails',
+                },
+            }, {
+                $unwind: "$roleDetails"
+            }, { 
                 $match : columnAndValue
             }, { 
                 $sort : {created_at:-1}
@@ -72,6 +83,13 @@ const getSort = async(requestParam) => {
             }, {
                 $project: {
                     _id: 0,
+                    user_id: 1,
+                    name: 1,
+                    email: 1,
+                    mobile: 1,
+                    status: 1,
+                    created_at: 1,
+                    role: "$roleDetails.title",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.users, joinArr);

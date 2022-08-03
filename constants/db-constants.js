@@ -17,5 +17,6 @@ module.exports = {
         cms: 'Cms',
         coupons: 'Coupon',
         jobs: 'Job',
+        roles: 'Role',
     }
 };

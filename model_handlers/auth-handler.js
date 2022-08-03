@@ -38,6 +38,12 @@ const login = async(requestParam) => {
             let res = await query.insertSingle(dbConstants.dbSchema.login_logs, inserRecord)
             response = JSON.parse(JSON.stringify(response));
             response.loginlog_id = res.loginlog_id
+
+            response.role = ''
+            let role = await query.selectWithAndOne(dbConstants.dbSchema.roles, {role_id: response.role_id}, { _id: 0}, { created_at: 1 });
+            if (role) {
+                response.role = role.title
+            }
             resolve(response);
             return;
         } catch (error) {
