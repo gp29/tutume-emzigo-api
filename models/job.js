@@ -9,6 +9,10 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    user_id: {
+        type: String,
+        default:''
+    },
     customer_id: {
         type: String,
         default:''

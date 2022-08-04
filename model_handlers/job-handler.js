@@ -38,6 +38,9 @@ const getSort = async(requestParam) => {
             if(requestParam.status){
                 columnAndValue.status = requestParam.status
             }
+            if(requestParam.user_id){
+                columnAndValue.user_id = requestParam.user_id
+            }
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
                     job_id: new RegExp(requestParam.text, 'i')
@@ -363,6 +366,9 @@ const action = async(requestParam) => {
         try {
             if(requestParam.type == 'delete'){
                 await query.removeMultiple(dbConstants.dbSchema.jobs, { job_id: { $in: requestParam['ids']}});
+            }
+            else{
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
             }
             resolve({});
             return;
