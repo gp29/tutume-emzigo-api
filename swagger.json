@@ -401,7 +401,8 @@
                                         "type": "string"
                                     },
                                     "pickup_instructions": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Optional"
                                     },
                                     "delivery_contact_name": {
                                         "type": "string"
@@ -410,13 +411,17 @@
                                         "type": "string"
                                     },
                                     "delivery_instructions": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Optional"
                                     },
                                     "item_name": {
                                         "type": "string"
                                     },
                                     "item_desc": {
                                         "type": "string"
+                                    },
+                                    "item_image": {
+                                        "type": "file"
                                     },
                                     "item_authority": {
                                         "type": "string",
@@ -1443,6 +1448,47 @@
                     }
                 }],
                 "operationId": "ProviderController.GetRatingsDeliveries"
+            }
+        },
+        "/provider/started-job": {
+            "post": {
+                "x-controller-name": "ProviderController",
+                "x-operation-name": "StartedJob",
+                "tags": ["ProviderController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "StartedJob",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "provider_id": {
+                                        "type": "string"
+                                    },
+                                    "job_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "ProviderController.StartedJob"
             }
         },
         "/provider/pickedup-job": {

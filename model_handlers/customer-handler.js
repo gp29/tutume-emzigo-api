@@ -498,6 +498,11 @@ const createJob = async(requestParam) => {
             if(!requestParam.transaction_id){
                 requestParam.transaction_id = 'TRA'+moment().unix()
             }
+            if(req.files){
+                if(req.files.item_image){
+                    requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
+                }
+            }
             await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
@@ -539,6 +544,11 @@ const updateJob = async(requestParam) => {
             }
             if(requestParam.amount_pay){
                 requestParam.amount_pay = parseFloat(parseFloat(requestParam.amount_pay).toFixed(2))
+            }
+            if(req.files){
+                if(req.files.item_image){
+                    requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
+                }
             }
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
             resolve(await encryptDecryptHandler.encrypt({}));
@@ -646,6 +656,7 @@ const getCurrentDelivery = async(requestParam) => {
                     pickedup_at: 1,
                     delivered_at: 1,
                     status: 1,
+                    item_image: 1,
                     vehicle_name:"$vehicleDetails.name",
                     delivery_option_name:"$delOptionDetails.name",
                     delivery_option_code:"$delOptionDetails.code",
@@ -672,6 +683,8 @@ const getCurrentDelivery = async(requestParam) => {
                 elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
                 elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
                 elem.accepted_at = elem.accepted_at ? timeZone(new Date(elem.accepted_at)).tz(requestParam.time_zone).format('lll') : ''
+
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
 
                 delete elem.delivery_option_code
             }))
@@ -744,6 +757,7 @@ const deliveryHistory = async(requestParam) => {
                     pickedup_at: 1,
                     delivered_at: 1,
                     status: 1,
+                    item_image: 1,
                     vehicle_name:"$vehicleDetails.name",
                     delivery_option_name:"$delOptionDetails.name",
                 }
@@ -759,6 +773,8 @@ const deliveryHistory = async(requestParam) => {
 
                 elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
                 elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
             return;

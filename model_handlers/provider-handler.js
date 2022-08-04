@@ -619,7 +619,7 @@ const deliveriesForYou = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let matchColumn = {provider_id: requestParam.provider_id, status: 'accepted'}
+            let matchColumn = {provider_id: requestParam.provider_id, status: {$in:["accepted", "started"]}}
             let joinArr = [{
                 $lookup: {
                     from: 'vehicles',
@@ -669,6 +669,7 @@ const deliveriesForYou = async(requestParam) => {
                     item_desc: 1,
                     item_authority: 1,
                     status: 1,
+                    item_image: 1,
                     formatted_distance: 1,
                     formatted_duration: 1,
                     vehicle_name:"$vehDetails.name",
@@ -697,6 +698,8 @@ const deliveriesForYou = async(requestParam) => {
                 elem.due_in = hours + "h " + minutes + "m";
 
                 elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
+
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
                 delete elem.delivery_option_code
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
@@ -747,6 +750,8 @@ const routesList = async(requestParam) => {
                 $and: [{
                     $or: [{
                         status: 'accepted'
+                    }, {
+                        status: 'started',
                     }, {
                         status: 'pickedup',
                     }]
@@ -823,6 +828,7 @@ const jobList = async(requestParam) => {
                     item_desc: 1,
                     item_authority: 1,
                     status: 1,
+                    item_image: 1,
                     formatted_distance: 1,
                     formatted_duration: 1,
                     pickedup_at: 1,
@@ -853,6 +859,8 @@ const jobList = async(requestParam) => {
 
                 elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
                 elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
+
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
                 delete elem.delivery_option_code
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
@@ -922,6 +930,7 @@ const historyList = async(requestParam) => {
                     item_desc: 1,
                     item_authority: 1,
                     status: 1,
+                    item_image: 1,
                     formatted_distance: 1,
                     formatted_duration: 1,
                     pickedup_at: 1,
@@ -936,6 +945,7 @@ const historyList = async(requestParam) => {
                 elem.pickup_from = timeZone(new Date(elem.pickup_from)).tz(requestParam.time_zone).format('DD MMM yyyy h:mm a')
                 elem.pickedup_at = elem.pickedup_at ? timeZone(new Date(elem.pickedup_at)).tz(requestParam.time_zone).format('lll') : ''
                 elem.delivered_at = elem.delivered_at ? timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
             return;
@@ -1036,6 +1046,30 @@ const pickedupJob = async(requestParam) => {
     })
 };
 
+const startedJob = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'started', started_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const deliveredJob = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -1107,5 +1141,6 @@ module.exports = {
     historyList,
     getRatingsDeliveries,
     pickedupJob,
+    startedJob,
     deliveredJob,
 };

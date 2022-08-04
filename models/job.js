@@ -109,6 +109,10 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    item_image: {
+        type: String,
+        default:''
+    },
     item_desc: {
         type: String,
         default:''
@@ -185,6 +189,9 @@ var jobSchema = new Schema({
         }
     },
     accepted_at: {
+        type: Date
+    },
+    started_at: {
         type: Date
     },
     pickedup_at: {

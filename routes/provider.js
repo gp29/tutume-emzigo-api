@@ -308,6 +308,21 @@ router.post('/pickedup-job', async(req, res) => {
     }
 });
 
+router.post('/started-job', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        if (!req.body.provider_id || !req.body.job_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await providerHandler.startedJob(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/delivered-job', async(req, res) => {
     try {
         if (!req.body.provider_id || !req.body.job_id || !req.files.signature_proof_image) {
