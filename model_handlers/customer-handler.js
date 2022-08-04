@@ -468,7 +468,7 @@ const checkPrice = async(requestParam) => {
     })
 };
 
-const createJob = async(requestParam, req) => {
+const createJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
@@ -498,11 +498,6 @@ const createJob = async(requestParam, req) => {
             if(!requestParam.transaction_id){
                 requestParam.transaction_id = 'TRA'+moment().unix()
             }
-            if(req.files){
-                if(req.files.item_image){
-                    requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
-                }
-            }
             await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
@@ -513,7 +508,7 @@ const createJob = async(requestParam, req) => {
     })
 };
 
-const updateJob = async(requestParam, req) => {
+const updateJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
@@ -545,11 +540,6 @@ const updateJob = async(requestParam, req) => {
             if(requestParam.amount_pay){
                 requestParam.amount_pay = parseFloat(parseFloat(requestParam.amount_pay).toFixed(2))
             }
-            if(req.files){
-                if(req.files.item_image){
-                    requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
-                }
-            }
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
@@ -561,6 +551,24 @@ const updateJob = async(requestParam, req) => {
     })
 };
 
+const uploadItemImgae = async(req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let item_image;
+            if(req.files){
+                if(req.files.item_image){
+                    item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
+                }
+            }
+            resolve(await encryptDecryptHandler.encrypt({item_image}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
 
 const applyCoupon = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -941,6 +949,7 @@ module.exports = {
     changePassword,
     logoutDelete,
     applyCoupon,
+    uploadItemImgae,
     getCurrentDelivery,
     deliveryHistory,
     cancelJob,

@@ -857,6 +857,44 @@
                 "operationId": "CustomerController.RateJob"
             }
         },
+        "/customer/upload-item-image": {
+            "post": {
+                "x-controller-name": "CustomerController",
+                "x-operation-name": "UploadItemImage",
+                "tags": ["CustomerController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "UploadItemImage",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "item_image": {
+                                        "type": "file"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "CustomerController.UploadItemImage"
+            }
+        },
 
         "/vehicle/list": {
             "get": {

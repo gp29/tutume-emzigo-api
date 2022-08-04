@@ -331,13 +331,13 @@ const details = async(requestParam) => {
     })
 };
 
-const createJobBackend = async(requestParam, req) => {
+const createJobBackend = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
-            let job = await customerHandler.createJob(requestParam, req)
+            let job = await customerHandler.createJob(requestParam)
             resolve({});
             return;
         } catch (error) {
@@ -348,13 +348,13 @@ const createJobBackend = async(requestParam, req) => {
     })
 };
 
-const updateJobBackend = async(requestParam, req) => {
+const updateJobBackend = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
-            let job = await customerHandler.updateJob(requestParam, req)
+            let job = await customerHandler.updateJob(requestParam)
             resolve({});
             return;
         } catch (error) {

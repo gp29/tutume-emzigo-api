@@ -200,7 +200,7 @@ router.post('/create-job', async(req, res) => {
         if(req.headers.time_zone){
             req.body.time_zone = req.headers.time_zone
         }
-        if (!req.body.customer_id || !req.body.vehicle_id || !req.body.delivery_option_id || !req.body.pickup_from || !req.body.item_name || !req.body.item_desc || !req.files.item_image) {
+        if (!req.body.customer_id || !req.body.vehicle_id || !req.body.delivery_option_id || !req.body.pickup_from || !req.body.item_name || !req.body.item_desc || !req.body.item_image) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
@@ -216,7 +216,7 @@ router.post('/create-job', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        let response = await customerHandler.createJob(req.body, req);
+        let response = await customerHandler.createJob(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -246,7 +246,7 @@ router.post('/update-job', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        let response = await customerHandler.updateJob(req.body, req);
+        let response = await customerHandler.updateJob(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -351,6 +351,19 @@ router.post('/rate-job', async(req, res) => {
             return
         }
         let response = await customerHandler.rateJob(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/upload-item-image', async(req, res) => {
+    try {
+        if (!req.files.item_image) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.uploadItemImgae(req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
