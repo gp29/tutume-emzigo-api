@@ -44,7 +44,7 @@ router.post('/get-coupon-reports', async(req, res) => {
 
 router.post('/create-job-backend', async(req, res) => {
     try {
-        let response = await jobHandler.createJobBackend(req.body);
+        let response = await jobHandler.createJobBackend(req.body, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -53,7 +53,7 @@ router.post('/create-job-backend', async(req, res) => {
 
 router.post('/update-job-backend', async(req, res) => {
     try {
-        let response = await jobHandler.updateJobBackend(req.body);
+        let response = await jobHandler.updateJobBackend(req.body, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

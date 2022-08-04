@@ -216,7 +216,7 @@ router.post('/create-job', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        let response = await customerHandler.createJob(req.body);
+        let response = await customerHandler.createJob(req.body, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -246,7 +246,7 @@ router.post('/update-job', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        let response = await customerHandler.updateJob(req.body);
+        let response = await customerHandler.updateJob(req.body, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

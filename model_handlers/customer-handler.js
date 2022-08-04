@@ -468,7 +468,7 @@ const checkPrice = async(requestParam) => {
     })
 };
 
-const createJob = async(requestParam) => {
+const createJob = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
@@ -513,7 +513,7 @@ const createJob = async(requestParam) => {
     })
 };
 
-const updateJob = async(requestParam) => {
+const updateJob = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );

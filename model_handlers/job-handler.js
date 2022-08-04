@@ -294,6 +294,9 @@ const details = async(requestParam) => {
                     signature_proof_image:1,
                     delivery_recipient_name:1,
                     specified_recipient:1,
+                    item_name:1,
+                    item_desc:1,
+                    item_image:1,
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
@@ -316,6 +319,7 @@ const details = async(requestParam) => {
                 elem.amount_pay = elem.amount_pay +' '+ currency
 
                 elem.signature_proof_image = elem.signature_proof_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/providers/${elem.signature_proof_image}`}) : ''
+                elem.item_image = elem.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${elem.item_image}`}) : ''
             }))
             resolve(data[0]);
             return;
@@ -327,13 +331,13 @@ const details = async(requestParam) => {
     })
 };
 
-const createJobBackend = async(requestParam) => {
+const createJobBackend = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
-            let job = await customerHandler.createJob(requestParam)
+            let job = await customerHandler.createJob(requestParam, req)
             resolve({});
             return;
         } catch (error) {
@@ -344,13 +348,13 @@ const createJobBackend = async(requestParam) => {
     })
 };
 
-const updateJobBackend = async(requestParam) => {
+const updateJobBackend = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
-            let job = await customerHandler.updateJob(requestParam)
+            let job = await customerHandler.updateJob(requestParam, req)
             resolve({});
             return;
         } catch (error) {
