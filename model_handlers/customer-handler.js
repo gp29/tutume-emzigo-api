@@ -561,6 +561,7 @@ const updateJob = async(requestParam, req) => {
     })
 };
 
+
 const applyCoupon = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
