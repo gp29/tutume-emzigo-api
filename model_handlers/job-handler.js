@@ -12,6 +12,8 @@ const customerHandler = require('./../model_handlers/customer-handler');
 const imgHandler = require('./../model_handlers/image-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 const timeZone = require('moment-timezone');
+const FCM = require('fcm-push');
+let fcm = new FCM(config.push_key);
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -21,6 +23,7 @@ const get = async(requestParam) => {
                 columnValue.job_id = requestParam.job_id
             }
             let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, columnValue, { _id: 0}, { created_at: 1 });
+            response.item_image = response.item_image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/customers/${response.item_image}`}) : ''
             resolve(response);
             return;
         } catch (error) {
@@ -331,12 +334,17 @@ const details = async(requestParam) => {
     })
 };
 
-const createJobBackend = async(requestParam) => {
+const createJobBackend = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
+            if(req.files){
+                if(req.files.item_image){
+                    requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
+                }
+            }
             let job = await customerHandler.createJob(requestParam)
             resolve({});
             return;
@@ -348,12 +356,22 @@ const createJobBackend = async(requestParam) => {
     })
 };
 
-const updateJobBackend = async(requestParam) => {
+const updateJobBackend = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let price = await encryptDecryptHandler.decryptJson(await customerHandler.checkPrice(requestParam))
             requestParam = {...requestParam, ...price}
             requestParam.amount_pay = requestParam.total
+            if(requestParam.change_logo){
+                if(req.files){
+                    if(req.files.item_image){
+                        requestParam.item_image = await imgHandler.uploadImage(req.files.item_image, config.aws.s3.customerBucket)
+                    }
+                }
+            }
+            else{
+                delete requestParam.item_image
+            }
             let job = await customerHandler.updateJob(requestParam)
             resolve({});
             return;
@@ -387,9 +405,84 @@ const action = async(requestParam) => {
 const assignProvider = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'accepted', accepted_at:new Date(), provider_id: requestParam.provider_id}, {job_id: { $in: requestParam['ids']}});
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1} );
+            if(response){
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'accepted', accepted_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.ids[0]});
+                sendNotificationProvider({provider_id: requestParam.provider_id})
+                sendNotificationCustomer({customer_id: response.customer_id, title:'Job Accepted', code:'ACCEPT_JOB'})
+            }
             resolve({});
             return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const sendNotificationProvider = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1, device_token:1} );
+            let template = await query.selectWithAndOne(dbConstants.dbSchema.push_templates, {code:'PROVIDER_NEW_ASSIGN'}, { _id:0, description:1} );
+            if(response && template){
+                let val = template.description
+                let message = {
+                    to: response.device_token,
+                    collapse_key: 'your_collapse_key',
+                    content_available: true,
+                    mutable_content: true,
+                    priority: "high",
+                    data: {
+                        type: 'New Job Assign',
+                        title: 'New Job',
+                    },
+                    notification: {
+                        title: 'New Job',
+                        body: val,
+                        sound: 'default'
+                    }
+                };
+                fcm.send(message, function(err, response) {
+                });
+            }
+            return false
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const sendNotificationCustomer = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1, device_token:1} );
+            let template = await query.selectWithAndOne(dbConstants.dbSchema.push_templates, {code:requestParam.code}, { _id:0, description:1} );
+            if(response && template){
+                let val = template.description
+                let message = {
+                    to: response.device_token,
+                    collapse_key: 'your_collapse_key',
+                    content_available: true,
+                    mutable_content: true,
+                    priority: "high",
+                    data: {
+                        type: requestParam.code,
+                        title: requestParam.title,
+                    },
+                    notification: {
+                        title: requestParam.title,
+                        body: val,
+                        sound: 'default'
+                    }
+                };
+                fcm.send(message, function(err, response) {
+                });
+            }
+            return false
         } catch (error) {
             console.log(error)
             reject(error)
@@ -461,5 +554,7 @@ module.exports = {
     updateJobBackend,
     action,
     assignProvider,
-    getCouponReports
+    getCouponReports,
+    sendNotificationCustomer,
+    sendNotificationProvider
 };

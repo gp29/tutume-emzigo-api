@@ -14,6 +14,7 @@ const imgHandler = require('./../model_handlers/image-handler');
 const FCM = require('fcm-push');
 let fcm = new FCM(config.push_key);
 const passwordHandler = require('./../utils/password-handler');
+const jobHandler = require('./../model_handlers/job-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 
 const get = async(requestParam) => {
@@ -1036,6 +1037,7 @@ const pickedupJob = async(requestParam) => {
                 return;
             }
             await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Pickedup', code:'PICKEDUP_JOB'})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
@@ -1060,6 +1062,7 @@ const startedJob = async(requestParam) => {
                 return;
             }
             await query.updateSingle(dbConstants.dbSchema.jobs, {status:'started', started_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Started', code:'START_JOB'})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
@@ -1107,6 +1110,7 @@ const deliveredJob = async(requestParam, req) => {
             requestParam.status = 'delivered'
             requestParam.delivered_at = new Date()
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Delivered', code:'DELIVERED_JOB'})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
