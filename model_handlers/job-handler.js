@@ -11,6 +11,7 @@ const responseCodes = require('./../utils/response-codes');
 const customerHandler = require('./../model_handlers/customer-handler');
 const imgHandler = require('./../model_handlers/image-handler');
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
+const request = require('request');
 const timeZone = require('moment-timezone');
 const FCM = require('fcm-push');
 let fcm = new FCM(config.push_key);
@@ -481,6 +482,14 @@ const sendNotificationCustomer = async(requestParam) => {
                 };
                 fcm.send(message, function(err, response) {
                 });
+            }
+            if(requestParam.code == 'PICKEDUP_JOB'){
+                // let msg = 'Your delivery job pin is '+requestParam.otp+'. Do not share it with anyone. Emzigo'
+                // let url = 'https://gw.selcommobile.com:8443/bin/send.json?USERNAME=gospoapi&PASSWORD=gospoapi&DESTADDR='+response.mobile+'&MESSAGE='+msg
+                // request(url, function (error, response, body) {
+                //     console.error('error:', error);
+                //     console.log('body:', body);
+                // });
             }
             return false
         } catch (error) {

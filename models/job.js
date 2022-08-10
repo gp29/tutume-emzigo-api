@@ -133,6 +133,10 @@ var jobSchema = new Schema({
         type: Number,
         default:0
     },
+    otp: {
+        type: Number,
+        default:0
+    },
     coupon_id: {
         type: String,
         default:''

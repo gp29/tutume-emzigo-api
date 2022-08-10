@@ -837,6 +837,7 @@ const jobList = async(requestParam) => {
                     pickedup_at: 1,
                     payment_type: 1,
                     collect_cash_from: 1,
+                    otp: 1,
                     vehicle_name:"$vehDetails.name",
                     delivery_option_name:"$delOptDetails.name",
                     delivery_option_code:"$delOptDetails.code",
@@ -1042,8 +1043,9 @@ const pickedupJob = async(requestParam) => {
                 reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.job_id});
-            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Pickedup', code:'PICKEDUP_JOB'})
+            let otp = Math.floor(1000 + Math.random() * 9000);
+            await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id, otp}, {job_id: requestParam.job_id});
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Pickedup', code:'PICKEDUP_JOB', otp})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
