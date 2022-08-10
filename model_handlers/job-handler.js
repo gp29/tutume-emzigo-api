@@ -422,6 +422,24 @@ const assignProvider = async(requestParam) => {
     })
 };
 
+const updatePrice = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1} );
+            if(response){
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {amount_pay: parseFloat(requestParam.price)}, {job_id: requestParam.ids[0]});
+                sendNotificationCustomer({customer_id: response.customer_id, title:'Price updated', code:'UPDATE_PRICE'})
+            }
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const sendNotificationProvider = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -563,6 +581,7 @@ module.exports = {
     updateJobBackend,
     action,
     assignProvider,
+    updatePrice,
     getCouponReports,
     sendNotificationCustomer,
     sendNotificationProvider
