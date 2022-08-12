@@ -514,7 +514,7 @@ const signin = async(requestParam, req) => {
             }
             let updateColumn = {updated_at: new Date()}
             if(requestParam.device_token){
-                updateColumn.device_token = requestParam.updateColumn
+                updateColumn.device_token = requestParam.device_token
             }
             await query.updateSingle(dbConstants.dbSchema.providers, updateColumn, {provider_id: response.provider_id});
             resolve(profile({provider_id: response.provider_id, time_zone: requestParam.time_zone}));
