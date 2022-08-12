@@ -182,6 +182,7 @@ const getSort = async(requestParam) => {
                     item_desc: 1,
                     pickup_address: 1,
                     delivery_address: 1,
+                    paid_status: 1,
                     customer: "$cusDetails.name",
                     provider: "$proDetails",
                     vehicle: "$vehDetails.name",
@@ -391,7 +392,12 @@ const action = async(requestParam) => {
                 await query.removeMultiple(dbConstants.dbSchema.jobs, { job_id: { $in: requestParam['ids']}});
             }
             else{
-                await query.updateMultiple(dbConstants.dbSchema.jobs, {status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
+                if(requestParam.type == 'paid'){
+                    await query.updateMultiple(dbConstants.dbSchema.jobs, {paid_status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
+                }
+                else{
+                    await query.updateMultiple(dbConstants.dbSchema.jobs, {status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
+                }
             }
             resolve({});
             return;

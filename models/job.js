@@ -157,6 +157,10 @@ var jobSchema = new Schema({
         type: String,
         default:'new'
     },
+    paid_status: {
+        type: String,
+        default:'unpaid'
+    },
     delivery_recipient_name: {
         type: String,
         default:''
