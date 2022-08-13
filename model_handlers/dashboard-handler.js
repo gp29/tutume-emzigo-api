@@ -79,7 +79,32 @@ const overAllCountJobs = (month, index, year) => {
     })
 };
 
+const receivedAmount = (requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let start = timeZone(new Date(requestParam.start_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+            let end = timeZone(new Date(requestParam.end_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+            let compairData = {
+                paid_status: 'paid',
+                created_at: {
+                    $lte: new Date(end + 'T23:59:59.000Z'),
+                    $gte: new Date(start + 'T00:00:00.000Z')
+                }
+            }
+            let jobs = await query.selectWithAnd(dbConstants.dbSchema.jobs, compairData, { _id: 0, total:1}, { created_at: 1 });
+            let sales = LD.sumBy(jobs, 'total');
+            resolve(parseFloat(sales).toFixed(2));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     getStatistics,
-    graph
+    graph,
+    receivedAmount
 };

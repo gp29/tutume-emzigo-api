@@ -27,4 +27,13 @@ router.get('/graph', async(req, res) => {
     }
 });
 
+router.get('/received-amount', async(req, res) => {
+    try {
+        let response = await dashboardHandler.receivedAmount(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;
