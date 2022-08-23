@@ -530,7 +530,7 @@ const signin = async(requestParam, req) => {
 const profile = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1, name:1, email:1, mobile_country_code:1, mobile:1, profile_photo:1, id_photo:1, address:1, vehicle_id:1, status:1} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.providers, {provider_id:requestParam.provider_id}, { _id:0, provider_id: 1, name:1, email:1, mobile_country_code:1, mobile:1, profile_photo:1, id_photo:1, address:1, vehicle_id:1, status:1, vehicle_number:1} );
             if(!response){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;

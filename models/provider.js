@@ -13,6 +13,10 @@ var providerSchema = new Schema({
         type: String,
         default:''
     },
+    vehicle_number: {
+        type: String,
+        default:''
+    },
     name: {
         type: String,
         default:''
