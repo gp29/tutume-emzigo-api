@@ -105,6 +105,10 @@ var jobSchema = new Schema({
         type: String,
         default: ''
     },
+    weight: {
+        type: String,
+        default:''
+    },
     item_name: {
         type: String,
         default:''
@@ -220,7 +224,7 @@ var jobSchema = new Schema({
 
 // // Execute before each user.save() call
 jobSchema.pre('save', async function(callback) {
-    this.job_id = await idGenerator.generateId('JOB'); 
+    this.job_id = await idGenerator.generateId('ORD'); 
 });
 
 let Job = mongoose.model('Job', jobSchema);

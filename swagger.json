@@ -414,6 +414,9 @@
                                         "type": "string",
                                         "description": "Optional"
                                     },
+                                    "weight": {
+                                        "type": "string"
+                                    },
                                     "item_name": {
                                         "type": "string"
                                     },

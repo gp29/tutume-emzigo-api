@@ -65,7 +65,7 @@ var providerSchema = new Schema({
 
 // // Execute before each user.save() call
 providerSchema.pre('save', async function(callback) {
-    this.provider_id = await idGenerator.generateId('PRO'); 
+    this.provider_id = await idGenerator.generateId('DRI'); 
 });
 
 var Provider = mongoose.model('Provider', providerSchema);

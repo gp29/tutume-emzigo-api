@@ -300,6 +300,7 @@ const details = async(requestParam) => {
                     delivery_recipient_name:1,
                     specified_recipient:1,
                     item_name:1,
+                    weight:1,
                     item_desc:1,
                     item_image:1,
                 }
