@@ -37,6 +37,7 @@ const cms = require('./routes/cms');
 const coupon = require('./routes/coupon');
 const job = require('./routes/job');
 const role = require('./routes/role');
+const region = require('./routes/region');
 
 //other configurations
 const passport = require('passport');
@@ -83,6 +84,7 @@ app.use('/api/cms', cms);
 app.use('/api/coupon', coupon);
 app.use('/api/job', job);
 app.use('/api/role', role);
+app.use('/api/region', region);
 
 app.use(upload());
 

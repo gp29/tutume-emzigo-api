@@ -2,52 +2,49 @@
 
 const responseCodes = require('./../utils/response-codes');
 const jsonResponse = require('./../utils/json-response');
-const config = require('./../config');
-const errors = require('./../utils/dz-errors');
 const express = require('express');
 const router = express.Router();
-const dashboardHandler = require('./../model_handlers/dashboard-handler');
-const labels = require('./../utils/labels.json')
+const regionHandler = require('./../model_handlers/region-handler');
 
-router.get('/get-statistics', async(req, res) => {
+router.post('/create', async(req, res) => {
     try {
-        let response = await dashboardHandler.getStatistics(req.query);
+        let response = await regionHandler.create(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
 });
 
-router.get('/graph', async(req, res) => {
+router.post('/get-sort', async(req, res) => {
     try {
-        let response = await dashboardHandler.graph(req.query);
+        let response = await regionHandler.getSort(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
 });
 
-router.get('/region-graph', async(req, res) => {
+router.get('/get', async(req, res) => {
     try {
-        let response = await dashboardHandler.regionGraph(req.query);
+        let response = await regionHandler.get(req.query);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
 });
 
-router.get('/region-amount-graph', async(req, res) => {
+router.post('/action', async(req, res) => {
     try {
-        let response = await dashboardHandler.regionAmountGraph(req.query);
+        let response = await regionHandler.action(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
     }
 });
 
-router.get('/received-amount', async(req, res) => {
+router.post('/update', async(req, res) => {
     try {
-        let response = await dashboardHandler.receivedAmount(req.query);
+        let response = await regionHandler.update(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

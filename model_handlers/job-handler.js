@@ -429,6 +429,23 @@ const assignProvider = async(requestParam) => {
     })
 };
 
+const assignRegion = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1} );
+            if(response){
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {region_id: requestParam.region_id}, {job_id: requestParam.ids[0]});    
+            }
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const updatePrice = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -580,6 +597,76 @@ const getCouponReports = async(requestParam) => {
     })
 };
 
+const getProviderReports = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let matchColumn = {
+                status:'active'
+            }
+            let filter = {
+                input: "$jobDetails",
+                as: "fav",
+                cond: { $eq: ['$$fav.status', 'delivered'] }
+            }
+            if(requestParam.start_date && requestParam.end_date){
+                let start_date = timeZone(new Date(requestParam.start_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                let end_date = timeZone(new Date(requestParam.end_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                filter = {
+                    input: "$jobDetails",
+                    as: "fav",
+                    cond: {
+                        "$and": [
+                            { "$eq": ['$$fav.status', 'delivered'] },
+                            { "$gte": ["$$fav.delivered_at", new Date(start_date+'T00:00:00.000Z')] },
+                            { "$lte": ["$$fav.delivered_at", new Date(end_date+'T23:59:59.000Z')] }
+                        ]
+                    }
+                }
+            }
+            let joinArr = [{
+                $lookup: {
+                    from: 'jobs',
+                    localField: 'provider_id',
+                    foreignField: 'provider_id',
+                    as: 'jobDetails'
+                }
+            },  { 
+                $match : matchColumn
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    provider_id: "$provider_id",
+                    name: "$name",
+                    created_at: "$created_at",
+                    jobs: {
+                        $filter: filter
+                    },
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.providers, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            let arr = []
+            await Promise.all(data.map(async (elem) => {
+                if(elem.jobs.length > 0){
+                    arr.push({
+                        provider_id: elem.provider_id,
+                        name: elem.name,
+                        jobs: elem.jobs.length
+                    })
+                }
+            }))
+            resolve(arr);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -588,8 +675,10 @@ module.exports = {
     updateJobBackend,
     action,
     assignProvider,
+    assignRegion,
     updatePrice,
     getCouponReports,
+    getProviderReports,
     sendNotificationCustomer,
     sendNotificationProvider
 };

@@ -80,9 +80,27 @@ router.post('/assign-provider', async(req, res) => {
     }
 });
 
+router.post('/assign-region', async(req, res) => {
+    try {
+        let response = await jobHandler.assignRegion(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/update-price', async(req, res) => {
     try {
         let response = await jobHandler.updatePrice(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/get-provider-reports', async(req, res) => {
+    try {
+        let response = await jobHandler.getProviderReports(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);

@@ -13,6 +13,10 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    region_id: {
+        type: String,
+        default:''
+    },
     customer_id: {
         type: String,
         default:''

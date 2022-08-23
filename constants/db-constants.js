@@ -18,5 +18,6 @@ module.exports = {
         coupons: 'Coupon',
         jobs: 'Job',
         roles: 'Role',
+        regions: 'Region',
     }
 };
