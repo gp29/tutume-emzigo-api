@@ -108,6 +108,18 @@ const getSort = async(requestParam) => {
                 },
             }, {
                 $unwind: "$delDetails"
+            }, {
+                $lookup: {
+                    from: 'regions',
+                    localField: 'region_id',
+                    foreignField: 'region_id',
+                    as: 'regDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$regDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -159,6 +171,18 @@ const getSort = async(requestParam) => {
                 },
             }, {
                 $unwind: "$delDetails"
+            }, {
+                $lookup: {
+                    from: 'regions',
+                    localField: 'region_id',
+                    foreignField: 'region_id',
+                    as: 'regDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$regDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -187,6 +211,7 @@ const getSort = async(requestParam) => {
                     provider: "$proDetails",
                     vehicle: "$vehDetails.name",
                     delivery_option: "$delDetails.name",
+                    region: "$regDetails",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
@@ -206,6 +231,12 @@ const getSort = async(requestParam) => {
                 }
                 else{
                     elem.provider = ''
+                }
+                if(elem.region){
+                    elem.region = elem.region.name
+                }
+                else{
+                    elem.region = ''
                 }
             })
 
