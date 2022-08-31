@@ -216,6 +216,10 @@ var jobSchema = new Schema({
     delivered_at: {
         type: Date
     },
+    is_send_noti: {
+        type: String,
+        default:'false'
+    },
     created_at: {
         type: Date,
         default: Date.now

@@ -107,4 +107,13 @@ router.post('/get-provider-reports', async(req, res) => {
     }
 });
 
+router.post('/send-notification-accept', async(req, res) => {
+    try {
+        let response = await jobHandler.sendNotificationAccept(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

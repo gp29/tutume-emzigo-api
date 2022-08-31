@@ -301,10 +301,10 @@ const sendNotiProvider = async(providers, title) => {
                     priority: "high",
                     data: {
                         type: 'promotion',
-                        title: 'Promotion',
+                        title: 'Tutume',
                     },
                     notification: {
-                        title: 'Promotion',
+                        title: 'Tutume',
                         body: title,
                         sound: 'default'
                     }
@@ -1057,7 +1057,7 @@ const pickedupJob = async(requestParam) => {
             }
             let otp = Math.floor(1000 + Math.random() * 9000);
             await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id, otp}, {job_id: requestParam.job_id});
-            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Pickedup', code:'PICKEDUP_JOB', otp})
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Tutume', code:'PICKEDUP_JOB', otp})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {

@@ -207,6 +207,8 @@ const getSort = async(requestParam) => {
                     pickup_address: 1,
                     delivery_address: 1,
                     paid_status: 1,
+                    otp: 1,
+                    is_send_noti: 1,
                     customer: "$cusDetails.name",
                     provider: "$proDetails",
                     vehicle: "$vehDetails.name",
@@ -238,6 +240,7 @@ const getSort = async(requestParam) => {
                 else{
                     elem.region = ''
                 }
+                if(!elem.otp || elem.otp == 0) elem.otp = ''
             })
 
             obj.data = data;
@@ -448,7 +451,25 @@ const assignProvider = async(requestParam) => {
             if(response){
                 await query.updateMultiple(dbConstants.dbSchema.jobs, {status: 'accepted', accepted_at:new Date(), provider_id: requestParam.provider_id}, {job_id: requestParam.ids[0]});
                 sendNotificationProvider({provider_id: requestParam.provider_id})
-                sendNotificationCustomer({customer_id: response.customer_id, title:'Job Accepted', code:'ACCEPT_JOB'})
+                sendNotificationCustomer({customer_id: response.customer_id, title:'Tutume', code:'ACCEPT_JOB'})
+            }
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const sendNotificationAccept = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1} );
+            if(response){
+                sendNotificationCustomer({customer_id: response.customer_id, title:'Tutume', code:'ACCEPT_JOB'})
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {is_send_noti:'true'}, {job_id: requestParam.ids[0]});
             }
             resolve({});
             return;
@@ -509,11 +530,11 @@ const sendNotificationProvider = async(requestParam) => {
                     mutable_content: true,
                     priority: "high",
                     data: {
-                        type: 'New Job Assign',
-                        title: 'New Job',
+                        type: 'new_order',
+                        title: 'Tutume',
                     },
                     notification: {
-                        title: 'New Job',
+                        title: 'Tutume',
                         body: val,
                         sound: 'default'
                     }
@@ -545,10 +566,10 @@ const sendNotificationCustomer = async(requestParam) => {
                     priority: "high",
                     data: {
                         type: requestParam.code,
-                        title: requestParam.title,
+                        title: 'Tutume',
                     },
                     notification: {
-                        title: requestParam.title,
+                        title: 'Tutume',
                         body: val,
                         sound: 'default'
                     }
@@ -706,6 +727,7 @@ module.exports = {
     updateJobBackend,
     action,
     assignProvider,
+    sendNotificationAccept,
     assignRegion,
     updatePrice,
     getCouponReports,
