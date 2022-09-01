@@ -302,11 +302,13 @@ const sendNotiProvider = async(providers, title) => {
                     data: {
                         type: 'promotion',
                         title: 'Tutume',
+                        android_channel_id: 'default'
                     },
                     notification: {
                         title: 'Tutume',
                         body: title,
-                        sound: 'default'
+                        sound: 'default',
+                        android_channel_id: 'default'
                     }
                 };
                 fcm.send(message, function(err, response) {

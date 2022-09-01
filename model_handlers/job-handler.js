@@ -532,11 +532,13 @@ const sendNotificationProvider = async(requestParam) => {
                     data: {
                         type: 'new_order',
                         title: 'Tutume',
+                        android_channel_id: 'default'
                     },
                     notification: {
                         title: 'Tutume',
                         body: val,
-                        sound: 'default'
+                        sound: 'default',
+                        android_channel_id: 'default'
                     }
                 };
                 fcm.send(message, function(err, response) {
@@ -567,11 +569,13 @@ const sendNotificationCustomer = async(requestParam) => {
                     data: {
                         type: requestParam.code,
                         title: 'Tutume',
+                        android_channel_id: 'default'
                     },
                     notification: {
                         title: 'Tutume',
                         body: val,
-                        sound: 'default'
+                        sound: 'default',
+                        android_channel_id: 'default'
                     }
                 };
                 fcm.send(message, function(err, response) {
