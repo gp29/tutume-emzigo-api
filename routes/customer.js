@@ -64,7 +64,7 @@ router.post('/signup', async(req, res) => {
         if(req.headers.time_zone){
             req.body.time_zone = req.headers.time_zone
         }
-        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password || !req.files.profile_photo) {
+        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
