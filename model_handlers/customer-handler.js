@@ -214,6 +214,36 @@ const action = async(requestParam) => {
 
 // FOR API
 
+const register = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            requestParam.email = requestParam.email.trim();
+            let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
+            let compareColumnAndValues = {
+                 $or: [{
+                    email: regexEmail
+                }, {
+                    mobile: requestParam.mobile,
+                    mobile_country_code: requestParam.mobile_country_code,
+                }]
+            };
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, compareColumnAndValues, { _id: 0, customer_id:1, name:1}, { created_at: 1 });
+            if(response){
+                resolve({name: response.name, customer_id: response.customer_id});
+                return;
+            }
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString())
+            let res = await query.insertSingle(dbConstants.dbSchema.customers, requestParam);
+            resolve({name: res.name, customer_id: res.customer_id});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const signup = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -949,6 +979,7 @@ module.exports = {
 
     // FOR API
     signup,
+    register,
     signin,
     updateProfile,
     profile,

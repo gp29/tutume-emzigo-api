@@ -58,13 +58,28 @@ router.post('/update', async(req, res) => {
 });
 
 // APIS
+
+// FOR OUTOF CLINET REQUEST
+router.post('/register', async(req, res) => {
+    try {
+        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.register(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/signup', async(req, res) => {
     try {
         req.body.time_zone = config.time_zone
         if(req.headers.time_zone){
             req.body.time_zone = req.headers.time_zone
         }
-        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password) {
+        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password || !req.files.profile_photo) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
