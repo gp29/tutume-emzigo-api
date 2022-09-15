@@ -384,6 +384,20 @@ router.get('/track-job', async(req, res) => {
     }
 });
 
+// FOR OUTSIDE CLIENT
+router.get('/track-order', async(req, res) => {
+    try {
+        if (!req.query.job_id) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await customerHandler.trackOrder(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/rate-job', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)

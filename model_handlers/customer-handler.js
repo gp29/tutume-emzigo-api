@@ -982,6 +982,24 @@ const trackJob = async(requestParam) => {
     })
 };
 
+const trackOrder = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, pickup_address:1, delivery_address:1} );
+            if(!job){
+                reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            resolve(job);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const rateJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -1037,5 +1055,6 @@ module.exports = {
     cancelJob,
     recentlyShipped,
     trackJob,
+    trackOrder,
     rateJob,
 };
