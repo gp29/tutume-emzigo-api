@@ -538,6 +538,47 @@ const createJob = async(requestParam) => {
     })
 };
 
+
+const createOrder = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.vehicles, {vehicle_id:requestParam.vehicle_id}, { _id:0, vehicle_id: 1} );
+            if(!vehicle){
+                reject(errors(labels.LBL_VEHICLE_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let delivery_option = await query.selectWithAndOne(dbConstants.dbSchema.delivery_options, {delivery_option_id:requestParam.delivery_option_id}, { _id:0, customer_id: 1} );
+            if(!delivery_option){
+                reject(errors(labels.LBL_DELIVERY_OPTION_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(requestParam.coupon_id && requestParam.coupon_id !== ''){
+                let coupon = await query.selectWithAndOne(dbConstants.dbSchema.coupons, {coupon_id:requestParam.coupon_id}, { _id:0, coupon_id: 1, total_used:1} );
+                if(coupon){
+                    await query.updateSingle(dbConstants.dbSchema.coupons, {$inc:{total_used: 1}}, {coupon_id: requestParam.coupon_id});
+                }
+            }
+            if(requestParam.amount_pay){
+                requestParam.amount_pay = parseFloat(parseFloat(requestParam.amount_pay).toFixed(2))
+            }
+            if(!requestParam.transaction_id){
+                requestParam.transaction_id = 'TRA'+moment().unix()
+            }
+            let ord = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
+            resolve({job_id: ord.job_id});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 const updateJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -985,6 +1026,7 @@ module.exports = {
     profile,
     checkPrice,
     createJob,
+    createOrder,
     updateJob,
     changePassword,
     logoutDelete,
