@@ -1632,6 +1632,6 @@
     },
     "components": {},
     "servers": [{
-        "url": "http://localhost:1440/api"
+        "url": "http://api.tutumee-mzigo.co.tz/api"
     }]
 }
