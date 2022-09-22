@@ -17,6 +17,13 @@ distance.apiKey = config.google_key;
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 const passwordHandler = require('./../utils/password-handler');
 
+const NodeGeocoder = require('node-geocoder');
+const geocoder = NodeGeocoder({
+    provider: 'google',
+    apiKey: config.google_key, // for Mapquest, OpenCage, Google Premier
+    formatter: null // 'gpx', 'string', ...
+});
+
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -568,6 +575,16 @@ const createOrder = async(requestParam) => {
             }
             if(!requestParam.transaction_id){
                 requestParam.transaction_id = 'TRA'+moment().unix()
+            }
+            let pick_res = await geocoder.geocode(requestParam.pickup_address);
+            if(pick_res.length > 0){
+                requestParam.pickup_latitude = pick_res[0].latitude
+                requestParam.pickup_longitude = pick_res[0].longitude
+            }
+            let del_res = await geocoder.geocode(requestParam.delivery_address);
+            if(del_res.length > 0){
+                requestParam.delivery_latitude = del_res[0].latitude
+                requestParam.delivery_longitude = del_res[0].longitude
             }
             let ord = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             resolve({job_id: ord.job_id});

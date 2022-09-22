@@ -30,6 +30,7 @@
 		"moment": "^2.18.1",
 		"moment-timezone": "^0.5.34",
 		"mongoose": "^5.10.18",
+		"node-geocoder": "^4.2.0",
 		"npm": "^6.14.9",
 		"npm-check-updates": "^10.2.2",
 		"passport": "0.3.2",
