@@ -245,11 +245,11 @@ router.post('/create-order', async(req, res) => {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        if (!req.body.pickup_address || !req.body.pickup_latitude || !req.body.pickup_longitude) {
+        if (!req.body.pickup_address) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
-        if (!req.body.delivery_address || !req.body.delivery_latitude || !req.body.delivery_longitude) {
+        if (!req.body.delivery_address) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
