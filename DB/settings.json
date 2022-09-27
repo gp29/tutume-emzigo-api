@@ -1,0 +1,17 @@
+[{
+  "_id": {
+    "$oid": "62c935b2e888102dc2b30e08"
+  },
+  "settings_id": "ROL165735365060",
+  "currency": "TZS",
+  "fb_url": "www.facebook.com",
+  "twitter_url": "www.twitter.com",
+  "instagram_url": "www.instagram.com",
+  "linkedin_url": "www.linkedin.com",
+  "call_us": "+255 746985660",
+  "sos_number": "+255 746985660",
+  "support_email": "customercare@tutume.co.tz",
+  "company_address": "Tanzania",
+  "__v": 0,
+  "whatsapp_number": "+255 746985660"
+}]

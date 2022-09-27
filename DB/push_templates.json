@@ -1,0 +1,115 @@
+[{
+  "_id": {
+    "$oid": "62edfc4af74c169cdc64dbcd"
+  },
+  "push_template_id": "PSN165976378614",
+  "title": "Accept Job",
+  "code": "ACCEPT_JOB",
+  "description": "Order accepted",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659763786379"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659763786380"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62edfc5df74c169cdc64dbd2"
+  },
+  "push_template_id": "PSN165976380571",
+  "title": "Start Job",
+  "code": "START_JOB",
+  "description": "Pickup in progress",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659763805834"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659763805834"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62edfcdff74c169cdc64dbd7"
+  },
+  "push_template_id": "PSN165976393544",
+  "title": "Pickup Job",
+  "code": "PICKEDUP_JOB",
+  "description": "Parcel pickedup",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659763935005"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659763935005"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62edfcf4f74c169cdc64dbdc"
+  },
+  "push_template_id": "PSN1659763956102",
+  "title": "Delivered Job",
+  "code": "DELIVERED_JOB",
+  "description": "Parcel delivered",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659763956437"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659763956437"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62edfd07f74c169cdc64dbe1"
+  },
+  "push_template_id": "PSN165976397563",
+  "title": "Provider Assign",
+  "code": "PROVIDER_NEW_ASSIGN",
+  "description": "You have a new shipment",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659763975467"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659763975468"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62f356018ae8346212de78eb"
+  },
+  "push_template_id": "PSN166011443374",
+  "title": "Update price",
+  "code": "UPDATE_PRICE",
+  "description": "Your job price has been updated, you can check new price.",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1660114433698"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1660114433698"
+    }
+  },
+  "__v": 0
+}]

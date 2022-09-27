@@ -1,0 +1,190 @@
+[{
+  "_id": {
+    "$oid": "62c93356502b5f2bcbc90562"
+  },
+  "price_id": "VHP165735304652",
+  "vehicle_id": "VEH1657346210104",
+  "delivery_option_id": "DEO1657351547108",
+  "base_fare": "15",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353046126"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353046126"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c93376502b5f2bcbc9057c"
+  },
+  "price_id": "VHP165735307829",
+  "vehicle_id": "VEH1657346210104",
+  "delivery_option_id": "DEO165735155266",
+  "base_fare": "12",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353078330"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353078330"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c9338e502b5f2bcbc90587"
+  },
+  "price_id": "VHP165735310270",
+  "vehicle_id": "VEH1657346210104",
+  "delivery_option_id": "DEO165735156084",
+  "base_fare": "10",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353102818"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353102818"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933a9502b5f2bcbc90595"
+  },
+  "price_id": "VHP165735312955",
+  "vehicle_id": "VEH165734622639",
+  "delivery_option_id": "DEO1657351547108",
+  "base_fare": "20",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353129136"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353129136"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933b2502b5f2bcbc9059c"
+  },
+  "price_id": "VHP165735313846",
+  "vehicle_id": "VEH165734622639",
+  "delivery_option_id": "DEO165735155266",
+  "base_fare": "15",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353138047"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353138047"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933ba502b5f2bcbc905a3"
+  },
+  "price_id": "VHP165735314644",
+  "vehicle_id": "VEH165734622639",
+  "delivery_option_id": "DEO165735156084",
+  "base_fare": "12",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353146536"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353146536"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933c7502b5f2bcbc905aa"
+  },
+  "price_id": "VHP165735315969",
+  "vehicle_id": "VEH165734624213",
+  "delivery_option_id": "DEO1657351547108",
+  "base_fare": "30",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353159824"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353159824"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933ce502b5f2bcbc905b1"
+  },
+  "price_id": "VHP165735316630",
+  "vehicle_id": "VEH165734624213",
+  "delivery_option_id": "DEO165735155266",
+  "base_fare": "25",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353166698"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353166698"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62c933d9502b5f2bcbc905b8"
+  },
+  "price_id": "VHP165735317722",
+  "vehicle_id": "VEH165734624213",
+  "delivery_option_id": "DEO165735156084",
+  "base_fare": "22",
+  "per_km_fare": "5",
+  "per_hour_fare": "8",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1657353177011"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1657353177011"
+    }
+  },
+  "__v": 0
+}]

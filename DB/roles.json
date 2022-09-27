@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "62ea56d96ce77ffe611fa945"
+  },
+  "role_id": "ROL165952482550",
+  "title": "Admin",
+  "status": "active",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659524825550"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659524825550"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62ea57086ce77ffe611fa94a"
+  },
+  "role_id": "ROL165952487251",
+  "title": "Corporate client",
+  "status": "active",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659524872778"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659524872778"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62ea57106ce77ffe611fa94f"
+  },
+  "role_id": "ROL165952488070",
+  "title": "Dispatcher",
+  "status": "active",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1659524880101"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1659524880101"
+    }
+  },
+  "__v": 0
+}]

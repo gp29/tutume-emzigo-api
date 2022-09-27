@@ -1,0 +1,85 @@
+[{
+  "_id": {
+    "$oid": "62de61c39d3c695ba8e8348a"
+  },
+  "cms_id": "CMS165874118726",
+  "title": "Privacy Policy",
+  "code": "PRIVACY_POLICY",
+  "type": "customer",
+  "link": "customer_PRIVACY_POLICY.html",
+  "description": "<p>Privacy Policy Customer</p>",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1658741187691"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1658741187691"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62de61d79d3c695ba8e8348e"
+  },
+  "cms_id": "CMS165874120788",
+  "title": "Privacy Policy",
+  "code": "PRIVACY_POLICY",
+  "type": "provider",
+  "link": "provider_PRIVACY_POLICY.html",
+  "description": "<p>Privacy Policy Provider</p>",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1658741207573"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1658741207573"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62de61f29d3c695ba8e83492"
+  },
+  "cms_id": "CMS165874123414",
+  "title": "Term Services",
+  "code": "TERM_SERVICE",
+  "type": "customer",
+  "link": "customer_TERM_SERVICE.html",
+  "description": "<p>Term Services Customer&nbsp;</p>",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1658741234283"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1658741234283"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "62de62089d3c695ba8e83496"
+  },
+  "cms_id": "CMS165874125658",
+  "title": "Term Services",
+  "code": "TERM_SERVICE",
+  "type": "provider",
+  "link": "provider_TERM_SERVICE.html",
+  "description": "<p>Term Services Provider</p>",
+  "created_at": {
+    "$date": {
+      "$numberLong": "1658741256983"
+    }
+  },
+  "updated_at": {
+    "$date": {
+      "$numberLong": "1658741256983"
+    }
+  },
+  "__v": 0
+}]
