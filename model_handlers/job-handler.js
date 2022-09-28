@@ -556,7 +556,7 @@ const sendNotificationProvider = async(requestParam) => {
 const sendNotificationCustomer = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1, device_token:1} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1, device_token:1, mobile:1, mobile_country_code:1} );
             let template = await query.selectWithAndOne(dbConstants.dbSchema.push_templates, {code:requestParam.code}, { _id:0, description:1} );
             if(response && template){
                 let val = template.description
@@ -582,12 +582,27 @@ const sendNotificationCustomer = async(requestParam) => {
                 });
             }
             if(requestParam.code == 'PICKEDUP_JOB'){
-                // let msg = 'Your delivery job pin is '+requestParam.otp+'. Do not share it with anyone. Emzigo'
-                // let url = 'https://gw.selcommobile.com:8443/bin/send.json?USERNAME=gospoapi&PASSWORD=gospoapi&DESTADDR='+response.mobile+'&MESSAGE='+msg
-                // request(url, function (error, response, body) {
-                //     console.error('error:', error);
-                //     console.log('body:', body);
-                // });
+                let msg = "Mpendwa "+requestParam.pickup_contact_name+", mzigo wako umepokelewa na TUTUME tayari kwa kusafirishwa. Ahsante kutumia TUTUME. Piga 0746985660"
+                let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno="+requestParam.pickup_contact_number+"&msgtext="+msg
+                request(url, function (error, response, body) {
+                    console.error('error:', error);
+                    console.log('body:', body);
+                });
+
+                let msg1 = "Mpendwa "+requestParam.delivery_contact_name+" Namba yako ya siri ni "+requestParam.otp+" ya mzigo wako "+requestParam.item_name+". Muonyeshe mleta mizigo wetu akifika. Ahsante kutumia TUTUME. Piga 0746985660"
+                let url1 = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno="+requestParam.delivery_contact_number+"&msgtext="+msg1
+                request(url1, function (error, response, body) {
+                    console.error('error:', error);
+                    console.log('body:', body);
+                });
+            }
+            if(requestParam.code == 'DELIVERED_JOB'){
+                let msg = "Mpendwa "+requestParam.pickup_contact_name+" mzigo wako umekwisha pokelewa na "+requestParam.delivery_contact_name+". Ahsante kutumia TUTUME. Piga 0746985660"
+                let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno="+requestParam.pickup_contact_number+"&msgtext="+msg
+                request(url, function (error, response, body) {
+                    console.error('error:', error);
+                    console.log('body:', body);
+                });
             }
             return false
         } catch (error) {

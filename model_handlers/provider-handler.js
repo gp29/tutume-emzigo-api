@@ -1052,14 +1052,14 @@ const pickedupJob = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1, pickup_contact_number:1, pickup_contact_name:1, delivery_contact_name:1, delivery_contact_number:1, item_name:1} );
             if(!job){
                 reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
             let otp = Math.floor(1000 + Math.random() * 9000);
             await query.updateSingle(dbConstants.dbSchema.jobs, {status:'pickedup', pickedup_at:new Date(), provider_id: requestParam.provider_id, otp}, {job_id: requestParam.job_id});
-            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Tutume', code:'PICKEDUP_JOB', otp})
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Tutume', code:'PICKEDUP_JOB', otp, pickup_contact_number: job.pickup_contact_number, delivery_contact_number: job.delivery_contact_number, pickup_contact_name: job.pickup_contact_name, delivery_contact_name: job.delivery_contact_name, item_name: job.item_name})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
@@ -1121,7 +1121,7 @@ const deliveredJob = async(requestParam, req) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1} );
+            let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, customer_id:1, pickup_contact_number:1, pickup_contact_name:1, delivery_contact_name:1} );
             if(!job){
                 reject(errors(labels.LBL_JOB_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
@@ -1132,7 +1132,7 @@ const deliveredJob = async(requestParam, req) => {
             requestParam.status = 'delivered'
             requestParam.delivered_at = new Date()
             await query.updateSingle(dbConstants.dbSchema.jobs, requestParam, {job_id: requestParam.job_id});
-            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Job Delivered', code:'DELIVERED_JOB'})
+            jobHandler.sendNotificationCustomer({customer_id: job.customer_id, title:'Tutume', code:'DELIVERED_JOB', pickup_contact_number: job.pickup_contact_number, pickup_contact_name: job.pickup_contact_name, delivery_contact_name: job.delivery_contact_name})
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
