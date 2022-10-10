@@ -1,4 +1,5 @@
 'use strict';
+'use strict';
 
 module.exports = {
     dbSchema: {
@@ -19,5 +20,7 @@ module.exports = {
         jobs: 'Job',
         roles: 'Role',
         regions: 'Region',
+        head_quarters: 'Head_quarter',
+        branches: 'Branch',
     }
 };

@@ -1,0 +1,201 @@
+'use strict';
+
+const config = require('./../../config');
+const errors = require('./../../utils/dz-errors');
+const dbConstants = require('./../../constants/db-constants');
+const query = require('./../../utils/query-creator');
+const branch = require('./../../models/branch');
+const _ = require('underscore');
+const labels = require('./../../utils/labels.json');
+const responseCodes = require('./../../utils/response-codes');
+const timeZone = require('moment-timezone');
+const passwordHandler = require('./../../utils/password-handler');
+const idGenerator = require('./../../utils/id-generator');
+
+const get = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnValue = {}
+            if(requestParam.branch_id){
+                columnValue.branch_id = requestParam.branch_id
+            }
+            if(requestParam.status){
+                columnValue.status = requestParam.status
+            }
+            let response = await query.selectWithAnd(dbConstants.dbSchema.branches, columnValue, { _id: 0}, { created_at: 1 });
+            if(requestParam.branch_id){
+                response = response[0]
+                resolve(response);
+                return;
+            }
+            resolve(response);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const getSort = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {}
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    branch_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    branch_name: new RegExp(requestParam.text, 'i')
+                }, {
+                    "headDetails.name": new RegExp(requestParam.text, 'i')
+                }, {
+                    registration_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    contact_no: new RegExp(requestParam.text, 'i')
+                }, {
+                    contact_email: new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{
+                $lookup: {
+                    from: 'head_quarters',
+                    localField: 'head_quarter_id',
+                    foreignField: 'head_quarter_id',
+                    as: 'headDetails',
+                },
+            }, {
+                $unwind: "$headDetails"
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    branch_id: 1
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.branches, joinArr);
+
+            joinArr = [{
+                $lookup: {
+                    from: 'head_quarters',
+                    localField: 'head_quarter_id',
+                    foreignField: 'head_quarter_id',
+                    as: 'headDetails',
+                },
+            }, {
+                $unwind: "$headDetails"
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    branch_id: 1,
+                    branch_name: 1,
+                    registration_id: 1,
+                    branch_contact_no: 1,
+                    branch_contact_email: 1,
+                    head_quarter: "$headDetails.name",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.branches, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const create = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            requestParam.registration_id = await generateRegId();
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString());
+            await query.insertSingle(dbConstants.dbSchema.branches, requestParam);
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const generateRegId = async() => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let registration_id = await idGenerator.generateString(6, true, false, false); 
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {registration_id}, { _id: 0}, { created_at: 1 });
+            if(response){
+                resolve(generateRegId());
+                return;
+            }else{
+                resolve(registration_id);
+                return;
+            }
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const update = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateSingle(dbConstants.dbSchema.branches, requestParam, {branch_id: requestParam.branch_id});
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const action = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if (requestParam['type']== "delete") {
+                await query.removeMultiple(dbConstants.dbSchema.branches, { branch_id: { $in: requestParam['ids']}});
+            }
+            else{
+                await query.updateMultiple(dbConstants.dbSchema.branches, {status: requestParam.type}, {branch_id: { $in: requestParam['ids']}});
+            }
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+module.exports = {
+    get,
+    getSort,
+    create,
+    update,
+    action,
+};

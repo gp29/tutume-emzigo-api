@@ -85,6 +85,8 @@ app.use('/api/coupon', coupon);
 app.use('/api/job', job);
 app.use('/api/role', role);
 app.use('/api/region', region);
+app.use('/api/head-quarter', require('./routes/petrol-modules/head-quarter'));
+app.use('/api/branch', require('./routes/petrol-modules/branch'));
 
 app.use(upload());
 
