@@ -432,6 +432,7 @@ const latestTransaction = async(requestParam) => {
                     elem.rider_name = rider.name
                     elem.rider_photo = rider.profile_photo
                 }
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
             return;
