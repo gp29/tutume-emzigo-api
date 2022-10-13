@@ -416,7 +416,7 @@ const latestTransaction = async(requestParam) => {
                 return;
             }
             let matchColumn = {type:'deduct', branch_id: requestParam.branch_id}
-            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.branch_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, transaction_code:1, created_at:1}, {
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.branch_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, created_at:1, type:1}, {
                 created_at: -1,
             }, {
                 skip,
@@ -457,7 +457,7 @@ const history = async(requestParam) => {
                 return;
             }
             let matchColumn = {branch_id: requestParam.branch_id}
-            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.branch_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, transaction_code:1, created_at:1, type:1}, {
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.branch_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, created_at:1, type:1}, {
                 created_at: -1,
             }, {
                 skip,
