@@ -1701,6 +1701,43 @@
                 }],
                 "operationId": "PetrolController.GetProfile"
             }
+        },
+        "/branch/get-rider-details": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "GetRiderDetails",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetRiderDetails",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "branch_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "rider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.GetRiderDetails"
+            }
         }
     },
     "components": {},

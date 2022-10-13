@@ -340,6 +340,28 @@ const updateBalance = async(requestParam) => {
     })
 };
 
+const getRiderDetails = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, name:1, mobile:1, total_balance:1, email:1} );
+            if(!rider){
+                reject(errors(labels.LBL_INVALID_QR_CODE_VALUE[config.default_language], responseCodes.Conflict));
+                return;
+            }
+            resolve(rider);
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
