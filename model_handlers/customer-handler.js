@@ -224,16 +224,22 @@ const action = async(requestParam) => {
 const register = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
-            requestParam.email = requestParam.email.trim();
-            let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
             let compareColumnAndValues = {
-                 $or: [{
-                    email: regexEmail
-                }, {
-                    mobile: requestParam.mobile,
-                    mobile_country_code: requestParam.mobile_country_code,
-                }]
+                mobile: requestParam.mobile,
+                mobile_country_code: requestParam.mobile_country_code,
             };
+            if(requestParam.email && requestParam.email!=''){
+                requestParam.email = requestParam.email.trim();
+                let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
+                compareColumnAndValues = {
+                     $or: [{
+                        email: regexEmail
+                    }, {
+                        mobile: requestParam.mobile,
+                        mobile_country_code: requestParam.mobile_country_code,
+                    }]
+                };
+            }
             let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, compareColumnAndValues, { _id: 0, customer_id:1, name:1}, { created_at: 1 });
             if(response){
                 resolve({name: response.name, customer_id: response.customer_id});
@@ -979,10 +985,12 @@ const cancelJob = async(requestParam) => {
 const trackJob = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
-            if(!response){
-                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
-                return;
+            if(requestParam.customer_id){
+                let response = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id:requestParam.customer_id}, { _id:0, customer_id: 1} );
+                if(!response){
+                    reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                    return;
+                }
             }
             let job = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.job_id}, { _id:0, job_id: 1, status:1, pickup_address:1, delivery_address:1} );
             if(!job){

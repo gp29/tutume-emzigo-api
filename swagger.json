@@ -799,6 +799,7 @@
                 "parameters": [{
                     "name": "customer_id",
                     "in": "query",
+                    "description": "Optional",
                     "schema": {
                         "type": "string"
                     }

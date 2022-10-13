@@ -62,7 +62,7 @@ router.post('/update', async(req, res) => {
 // FOR OUTOF CLINET REQUEST
 router.post('/register', async(req, res) => {
     try {
-        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.email || !req.body.password) {
+        if (!req.body.name || !req.body.mobile_country_code || !req.body.mobile || !req.body.password) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
@@ -373,7 +373,7 @@ router.get('/track-job', async(req, res) => {
         if(req.headers.time_zone){
             req.query.time_zone = req.headers.time_zone
         }
-        if (!req.query.customer_id || !req.query.job_id) {
+        if (!req.query.job_id) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
