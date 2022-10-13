@@ -355,7 +355,7 @@ const getRiderDetails = async(requestParam) => {
                 return;
             }
             rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
-            resolve(rider);
+            resolve(await encryptDecryptHandler.encrypt(rider));
             return;
         } catch (error) {
             reject(error)
@@ -378,7 +378,7 @@ const submitAmount = async(requestParam) => {
                 return;
             }
             if(parseFloat(rider.total_balance) >= parseFloat(rider.total_balance))
-            resolve({});
+            resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
             reject(error)
