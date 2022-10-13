@@ -1783,6 +1783,37 @@
                 },
                 "operationId": "PetrolController.SubmitAmount"
             }
+        },
+        "/branch/latest-transaction": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "LatestTransaction",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "LatestTransaction",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "branch_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.LatestTransaction"
+            }
         }
     },
     "components": {},
