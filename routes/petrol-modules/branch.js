@@ -55,6 +55,24 @@ router.post('/update', async(req, res) => {
     }
 });
 
+router.post('/get-account', async(req, res) => {
+    try {
+        let response = await branchHandler.getAccount(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/update-balance', async(req, res) => {
+    try {
+        let response = await branchHandler.updateBalance(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/signin', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)

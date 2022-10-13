@@ -5,6 +5,7 @@ const errors = require('./../../utils/dz-errors');
 const dbConstants = require('./../../constants/db-constants');
 const query = require('./../../utils/query-creator');
 const branch = require('./../../models/branch');
+const branch_activity = require('./../../models/branch-activity');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
@@ -220,7 +221,7 @@ const signin = async(requestParam, req) => {
 const profile = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, created_at: 0, __v:0, updated_at:0} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, created_at: 0, __v:0, updated_at:0, password:0} );
             if(!response){
                 reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
@@ -236,6 +237,109 @@ const profile = async(requestParam) => {
     })
 };
 
+const getAccount = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {}
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    branch_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    branch_name: new RegExp(requestParam.text, 'i')
+                }, {
+                    "headDetails.name": new RegExp(requestParam.text, 'i')
+                }, {
+                    registration_id: new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{
+                $lookup: {
+                    from: 'head_quarters',
+                    localField: 'head_quarter_id',
+                    foreignField: 'head_quarter_id',
+                    as: 'headDetails',
+                },
+            }, {
+                $unwind: "$headDetails"
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    branch_id: 1
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.branches, joinArr);
+
+            joinArr = [{
+                $lookup: {
+                    from: 'head_quarters',
+                    localField: 'head_quarter_id',
+                    foreignField: 'head_quarter_id',
+                    as: 'headDetails',
+                },
+            }, {
+                $unwind: "$headDetails"
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    branch_id: 1,
+                    branch_name: 1,
+                    registration_id: 1,
+                    total_balance: 1,
+                    head_quarter: "$headDetails.name",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.branches, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            _.each(data, (elem) => {
+                elem.total_balance = elem.total_balance+' TZS'
+            })
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const updateBalance = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: parseFloat(requestParam.total_balance)}}, {branch_id: requestParam.branch_id});
+            requestParam.type = 'add'
+            requestParam.amount = requestParam.total_balance
+            requestParam.by_whom = 'admin'
+            requestParam.by_whom_id = requestParam.user_id
+            await query.insertSingle(dbConstants.dbSchema.branch_activities, requestParam);
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -243,5 +347,7 @@ module.exports = {
     update,
     action,
     signin,
-    profile
+    profile,
+    getAccount,
+    updateBalance
 };

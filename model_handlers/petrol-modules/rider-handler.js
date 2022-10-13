@@ -5,6 +5,7 @@ const errors = require('./../../utils/dz-errors');
 const dbConstants = require('./../../constants/db-constants');
 const query = require('./../../utils/query-creator');
 const rider = require('./../../models/rider');
+const rider_activity = require('./../../models/rider-activity');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
@@ -233,10 +234,92 @@ const action = async(requestParam) => {
     })
 };
 
+const getAccount = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let fullUrl = req.protocol + '://' + req.get('host');
+            let columnAndValue = {}
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    rider_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    name: new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id: "$rider_id"
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
+
+            joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id: 1,
+                    name: 1,
+                    total_balance: 1,
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            _.each(data, (elem) => {
+                elem.total_balance = elem.total_balance+' TZS'
+            })
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const updateBalance = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: parseFloat(requestParam.total_balance)}}, {rider_id: requestParam.rider_id});
+            requestParam.type = 'add'
+            requestParam.amount = requestParam.total_balance
+            requestParam.by_whom = 'admin'
+            requestParam.by_whom_id = requestParam.user_id
+            await query.insertSingle(dbConstants.dbSchema.rider_activities, requestParam);
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
     create,
     update,
     action,
+    getAccount,
+    updateBalance
 };

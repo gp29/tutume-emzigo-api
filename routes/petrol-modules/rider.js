@@ -51,4 +51,22 @@ router.post('/update', async(req, res) => {
     }
 });
 
+router.post('/get-account', async(req, res) => {
+    try {
+        let response = await riderHandler.getAccount(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/update-balance', async(req, res) => {
+    try {
+        let response = await riderHandler.updateBalance(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

@@ -4,46 +4,34 @@ var Schema = mongoose.Schema;
 const idGenerator = require('./../utils/id-generator');
 
 // create a schema
-var branchSchema = new Schema({
-    branch_id: {
+var riderActivitySchema = new Schema({
+    activity_id: {
         type: String,
         default:''
     },
-    head_quarter_id: {
+    user_id: {
         type: String,
         default:''
     },
-    branch_name: {
+    rider_id: {
         type: String,
         default:''
     },
-    registration_id: {
+    type: {
         type: String,
         default:''
     },
-    password: {
-        type: String,
-        default:''
-    },
-    branch_contact_no: {
-        type: String,
-        default:''
-    },
-    branch_contact_email: {
-        type: String,
-        default:''
-    },
-    branch_manager_name: {
-        type: String,
-        default:''
-    },
-    branch_manager_contact_no: {
-        type: String,
-        default:''
-    },
-    total_balance: {
+    amount: {
         type: Number,
         default:0
+    },
+    transaction_code: {
+        type: String,
+        default:''
+    },
+    by_whom: {
+        type: String,
+        default:''
     },
     created_at: {
         type: Date,
@@ -56,9 +44,9 @@ var branchSchema = new Schema({
 });
 
 // // Execute before each user.save() call
-branchSchema.pre('save', async function(callback) {
-    this.branch_id = await idGenerator.generateId('BRA');
+riderActivitySchema.pre('save', async function(callback) {
+    this.activity_id = await idGenerator.generateId('RDA');
 });
 
-var Branch = mongoose.model('Branch', branchSchema);
-module.exports = Branch;
+var Rider_activity = mongoose.model('Rider_activity', riderActivitySchema);
+module.exports = Rider_activity;
