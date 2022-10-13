@@ -443,6 +443,47 @@ const latestTransaction = async(requestParam) => {
     })
 };
 
+const history = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let page = (requestParam.page ? requestParam.page : 1);
+            let limit = 10;
+            page -= 1;
+            let skip = page * limit;
+
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1} );
+            if(!response){
+                reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let matchColumn = {branch_id: requestParam.branch_id}
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.branch_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, transaction_code:1, created_at:1, type:1}, {
+                created_at: -1,
+            }, {
+                skip,
+                limit
+            });
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.rider_name = ''
+                elem.rider_photo = ''
+                let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
+                if(rider){
+                    rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
+                    elem.rider_name = rider.name
+                    elem.rider_photo = rider.profile_photo
+                }
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -455,5 +496,6 @@ module.exports = {
     updateBalance,
     getRiderDetails,
     submitAmount,
-    latestTransaction
+    latestTransaction,
+    history
 };
