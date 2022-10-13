@@ -11,6 +11,7 @@ const responseCodes = require('./../../utils/response-codes');
 const timeZone = require('moment-timezone');
 const passwordHandler = require('./../../utils/password-handler');
 const idGenerator = require('./../../utils/id-generator');
+const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-handler');
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -192,10 +193,55 @@ const action = async(requestParam) => {
     })
 };
 
+const signin = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {registration_id:requestParam.registration_id}, { _id:0, branch_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            let encryptPassword = await passwordHandler.encrypt(requestParam.password.toString());
+            if(encryptPassword != response.password){
+                reject(errors(labels.LBL_INVALID_PWD[config.default_language], responseCodes.InvalidOTP));
+                return;
+            }
+            resolve(profile({branch_id: response.branch_id, time_zone: requestParam.time_zone}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const profile = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, created_at: 0, __v:0, updated_at:1} );
+            if(!response){
+                reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            resolve(await encryptDecryptHandler.encrypt(response));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
     create,
     update,
     action,
+    signin,
+    profile
 };
