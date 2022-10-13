@@ -1814,6 +1814,43 @@
                 }],
                 "operationId": "PetrolController.LatestTransaction"
             }
+        },
+        "/branch/history": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "LatestTransaction",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "LatestTransaction",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "branch_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "page",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }],
+                "operationId": "PetrolController.LatestTransaction"
+            }
         }
     },
     "components": {},
