@@ -363,6 +363,29 @@ const getRiderDetails = async(requestParam) => {
     })
 };
 
+const submitAmount = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1} );
+            if(!response){
+                reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, total_balance:1} );
+            if(!rider){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.Conflict));
+                return;
+            }
+            if(parseFloat(rider.total_balance) >= parseFloat(rider.total_balance))
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -372,5 +395,7 @@ module.exports = {
     signin,
     profile,
     getAccount,
-    updateBalance
+    updateBalance,
+    getRiderDetails,
+    submitAmount
 };
