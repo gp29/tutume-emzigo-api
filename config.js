@@ -16,6 +16,7 @@ const requiredParams = [
     'AWS_S3_VEHICLE_BUCKET',
     'AWS_S3_PROVIDER_BUCKET',
     'AWS_S3_CMS_BUCKET',
+    'AWS_S3_QRCODE_BUCKET',
     'DATABASE_URL',
     'PUSH_KEY',
     'GOOGLE_KEY',
@@ -59,6 +60,7 @@ module.exports = {
             vehicleBucket: process.env.AWS_S3_VEHICLE_BUCKET,
             providerBucket: process.env.AWS_S3_PROVIDER_BUCKET,
             cmsBucket: process.env.AWS_S3_CMS_BUCKET,
+            qrcodeBucket: process.env.AWS_S3_QRCODE_BUCKET,
 	    },
 	}
 };

@@ -27,6 +27,29 @@ const uploadImage = (file, bucket) => {
     })
 };
 
+const uploadPdf = (path, bucket) => {
+    return new Promise((resolve, reject) => {
+        async function main() { 
+            try {
+                const randomStr = await idGeneratorHandler.generateString(8, true, false, false); // length, number, letters, special
+                const fileType = 'pdf';
+                let obj = {}
+                obj.path = path;
+                obj.file_name = `${moment().unix()}${randomStr}.${fileType}`;
+                obj.bucket = bucket;
+                obj.contentType = 'application/pdf';
+                await AWSHandler.pdfUpload(obj);
+                resolve(obj.file_name);
+                return;
+            } catch (error) {
+                reject(error);
+                return;
+            }
+        }
+        main()
+    })
+};
+
 const deleteImage = (objects, bucket) => {
     return new Promise((resolve, reject) => {
         async function main() { 
@@ -61,6 +84,9 @@ const getImage = (params) => {
                 if(params.key.includes("cms") == true){
                     img = config.aws.prefix + config.aws.s3.cmsBucket + '/' + key
                 }
+                if(params.key.includes("qrcodes") == true){
+                    img = config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + key
+                }
                 resolve(img);
                 return;
             } catch (error) {
@@ -75,5 +101,6 @@ const getImage = (params) => {
 module.exports = {
     uploadImage,
     deleteImage,
-    getImage
+    getImage,
+    uploadPdf
 };

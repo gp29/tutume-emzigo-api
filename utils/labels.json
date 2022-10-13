@@ -26,6 +26,9 @@
     "LBL_EMAIL_ALREADY_EXISTS": {
         "EN": "Email already exists in our system"
     },
+    "LBL_MOBILE_ALREADY_EXISTS": {
+        "EN": "Mobile already exists in our system"
+    },
     "LBL_RECORD_ALREADY_EXISTS": {
         "EN": "Record already exists in our system"
     },

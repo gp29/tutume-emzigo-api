@@ -42,6 +42,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+public/qrcodes/
 package-lock.json
 jspm_packages/
 

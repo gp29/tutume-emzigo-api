@@ -22,5 +22,6 @@ module.exports = {
         regions: 'Region',
         head_quarters: 'Head_quarter',
         branches: 'Branch',
+        riders: 'Rider',
     }
 };

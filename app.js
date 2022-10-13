@@ -87,6 +87,7 @@ app.use('/api/role', role);
 app.use('/api/region', region);
 app.use('/api/head-quarter', require('./routes/petrol-modules/head-quarter'));
 app.use('/api/branch', require('./routes/petrol-modules/branch'));
+app.use('/api/rider', require('./routes/petrol-modules/rider'));
 
 app.use(upload());
 
