@@ -1738,6 +1738,50 @@
                 }],
                 "operationId": "PetrolController.GetRiderDetails"
             }
+        },
+        "/branch/submit-amount": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "SubmitAmount",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "SubmitAmount",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "branch_id": {
+                                        "type": "string"
+                                    },
+                                    "rider_id": {
+                                        "type": "string"
+                                    },
+                                    "amount": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.SubmitAmount"
+            }
         }
     },
     "components": {},
