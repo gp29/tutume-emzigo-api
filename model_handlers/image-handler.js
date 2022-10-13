@@ -87,6 +87,9 @@ const getImage = (params) => {
                 if(params.key.includes("qrcodes") == true){
                     img = config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + key
                 }
+                if(params.key.includes("riders") == true){
+                    img = config.aws.prefix + config.aws.s3.riderBucket + '/' + key
+                }
                 resolve(img);
                 return;
             } catch (error) {

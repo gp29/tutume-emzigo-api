@@ -39,6 +39,7 @@ const get = async(requestParam) => {
             let response = await query.selectWithAnd(dbConstants.dbSchema.riders, columnValue, { _id: 0}, { created_at: 1 });
             if(requestParam.rider_id){
                 response = response[0]
+                response.profile_photo = response.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${response.profile_photo}`}) : ''
                 resolve(response);
                 return;
             }
@@ -125,13 +126,18 @@ const getSort = async(requestParam, req) => {
     })
 };
 
-const create = async(requestParam) => {
+const create = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile: requestParam.mobile}, { _id: 0, rider_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
+            }
+            if(req.files){
+                if(req.files.profile_photo){
+                    requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.riderBucket)
+                }
             }
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
             QRCode.toDataURL(res.rider_id, async function(err, url) {
@@ -195,6 +201,19 @@ const update = async(requestParam, req) => {
                 reject(errors(labels.LBL_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, profile_photo:1}, { created_at: 1 });
+            if (requestParam.change_logo) {
+                const objects = [{
+                    Key: `emzigo/riders/${rider.profile_photo}`
+                }];
+                await imgHandler.deleteImage(objects, config.aws.bucketName)
+                requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.riderBucket)
+            }
+            else{
+                delete requestParam.profile_photo
+            }
+            delete requestParam.qrcode
+            delete requestParam.qrcode_pdf
             await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: requestParam.rider_id});
             resolve({});
             return;
@@ -210,12 +229,14 @@ const action = async(requestParam) => {
         try {
             if (requestParam['type']== "delete") {
                 let objects = []
-                let response = await query.selectWithAnd(dbConstants.dbSchema.riders, {rider_id: {$in: requestParam.ids}}, { _id: 0, rider_id:1, qrcode:1, qrcode_pdf:1}, { created_at: 1 });
+                let response = await query.selectWithAnd(dbConstants.dbSchema.riders, {rider_id: {$in: requestParam.ids}}, { _id: 0, rider_id:1, qrcode:1, qrcode_pdf:1, profile_photo:1}, { created_at: 1 });
                 await Promise.all(response.map(async (elem) => {
                     objects = [{
                         Key: `emzigo/qrcodes/${elem.qrcode}`
                     }, {
                         Key: `emzigo/qrcodes/${elem.qrcode_pdf}`
+                    }, {
+                        Key: `emzigo/riders/${elem.profile_photo}`
                     }];
                     fs.unlinkSync('./public/qrcodes/'+elem.rider_id+'.pdf')
                 }))

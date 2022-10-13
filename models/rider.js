@@ -21,6 +21,14 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    address: {
+        type: String,
+        default:''
+    },
+    profile_photo: {
+        type: String,
+        default:''
+    },
     qrcode: {
         type: String,
         default:''

@@ -8,7 +8,8 @@ const riderHandler = require('./../../model_handlers/petrol-modules/rider-handle
 
 router.post('/create', async(req, res) => {
     try {
-        let response = await riderHandler.create(req.body);
+        let requestParam = JSON.parse(req.body.fields);
+        let response = await riderHandler.create(requestParam, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
@@ -44,7 +45,8 @@ router.post('/action', async(req, res) => {
 
 router.post('/update', async(req, res) => {
     try {
-        let response = await riderHandler.update(req.body);
+        let requestParam = JSON.parse(req.body.fields);
+        let response = await riderHandler.update(requestParam, req);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
