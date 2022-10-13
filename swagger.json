@@ -1670,6 +1670,37 @@
                 },
                 "operationId": "PetrolController.Signin"
             }
+        },
+        "/branch/profile": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "GetProfile",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetProfile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "branch_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.GetProfile"
+            }
         }
     },
     "components": {},
