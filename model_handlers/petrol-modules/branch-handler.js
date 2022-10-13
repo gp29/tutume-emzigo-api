@@ -220,7 +220,7 @@ const signin = async(requestParam, req) => {
 const profile = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, created_at: 0, __v:0, updated_at:1} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, created_at: 0, __v:0, updated_at:0} );
             if(!response){
                 reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
