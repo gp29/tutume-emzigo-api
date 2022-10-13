@@ -385,8 +385,8 @@ const submitAmount = async(requestParam) => {
                 reject(errors(labels.LBL_AMOUNT_NOT_MORE_THEN_BRANCH_BALANCE[config.default_language], responseCodes.NotActive));
                 return;
             }
-            await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: -parseFloat(requestParam.total_balance)}}, {branch_id: requestParam.branch_id});
-            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.total_balance)}}, {rider_id: requestParam.rider_id});
+            await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {branch_id: requestParam.branch_id});
+            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             let obj = {
                 branch_id: requestParam.branch_id,
                 rider_id: requestParam.rider_id,
