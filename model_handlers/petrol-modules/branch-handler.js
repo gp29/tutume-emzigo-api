@@ -426,7 +426,7 @@ const latestTransaction = async(requestParam) => {
             await Promise.all(lists.map(async (elem) => {
                 elem.rider_name = ''
                 elem.rider_photo = ''
-                let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
+                let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
                 if(rider){
                     rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
                     elem.rider_name = rider.name
@@ -467,7 +467,7 @@ const history = async(requestParam) => {
             await Promise.all(lists.map(async (elem) => {
                 elem.rider_name = ''
                 elem.rider_photo = ''
-                let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
+                let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
                 if(rider){
                     rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
                     elem.rider_name = rider.name
