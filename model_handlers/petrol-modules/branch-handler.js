@@ -196,7 +196,7 @@ const action = async(requestParam) => {
 const signin = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {registration_id:requestParam.registration_id}, { _id:0, branch_id:1} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {registration_id:requestParam.registration_id}, { _id:0, branch_id:1, password:1} );
             if(!response){
                 reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;

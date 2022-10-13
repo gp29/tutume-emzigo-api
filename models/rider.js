@@ -29,6 +29,10 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    total_balance: {
+        type: Number,
+        default:0
+    },
     created_at: {
         type: Date,
         default: Date.now
