@@ -465,7 +465,7 @@ const history = async(requestParam) => {
             });
             lists = JSON.parse(JSON.stringify(lists))
             await Promise.all(lists.map(async (elem) => {
-                elem.rider_name = ''
+                elem.rider_name = 'Admin'
                 elem.rider_photo = ''
                 let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name:1, profile_photo:1} );
                 if(rider){
