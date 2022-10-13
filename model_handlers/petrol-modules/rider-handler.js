@@ -216,6 +216,7 @@ const action = async(requestParam) => {
                     }, {
                         Key: `emzigo/qrcodes/${elem.qrcode_pdf}`
                     }];
+                    fs.unlinkSync('./public/qrcodes/'+elem.rider_id+'.pdf')
                 }))
                 await imgHandler.deleteImage(objects, config.aws.bucketName)
                 await query.removeMultiple(dbConstants.dbSchema.riders, { rider_id: { $in: requestParam['ids']}});
