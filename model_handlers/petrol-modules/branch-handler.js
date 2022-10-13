@@ -377,7 +377,25 @@ const submitAmount = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.Conflict));
                 return;
             }
-            if(parseFloat(rider.total_balance) >= parseFloat(rider.total_balance))
+            if(parseFloat(requestParam.amount) > parseFloat(rider.total_balance)){
+                reject(errors(labels.LBL_AMOUNT_NOT_MORE_THEN_RIDER_BALANCE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            if(parseFloat(requestParam.amount) > parseFloat(response.total_balance)){
+                reject(errors(labels.LBL_AMOUNT_NOT_MORE_THEN_BRANCH_BALANCE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: -parseFloat(requestParam.total_balance)}}, {branch_id: requestParam.branch_id});
+            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.total_balance)}}, {rider_id: requestParam.rider_id});
+            let obj = {
+                branch_id: requestParam.branch_id,
+                rider_id: requestParam.rider_id,
+                type:'deduct',
+                amount: requestParam.amount,
+                by_whom:'You'
+            }
+            await query.insertSingle(dbConstants.dbSchema.branch_activities, obj);
+            await query.insertSingle(dbConstants.dbSchema.rider_activities, obj);
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {

@@ -61,5 +61,11 @@
     },
     "LBL_INVALID_QR_CODE_VALUE": {
         "EN": "Invalid QR code value."
+    },
+    "LBL_AMOUNT_NOT_MORE_THEN_RIDER_BALANCE": {
+        "EN": "Rider don't have to sufficient balance."
+    },
+    "LBL_AMOUNT_NOT_MORE_THEN_BRANCH_BALANCE": {
+        "EN": "Branch don't have to sufficient balance."
     }
 }

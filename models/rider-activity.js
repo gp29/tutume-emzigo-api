@@ -9,7 +9,11 @@ var riderActivitySchema = new Schema({
         type: String,
         default:''
     },
-    user_id: {
+    by_whom_id: {
+        type: String,
+        default:''
+    },
+    branch_id: {
         type: String,
         default:''
     },

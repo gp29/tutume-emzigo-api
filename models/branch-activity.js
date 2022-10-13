@@ -9,7 +9,11 @@ var branchActivitySchema = new Schema({
         type: String,
         default:''
     },
-    user_id: {
+    by_whom_id: {
+        type: String,
+        default:''
+    },
+    rider_id: {
         type: String,
         default:''
     },
