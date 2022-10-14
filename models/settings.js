@@ -49,6 +49,10 @@ var settingsSchema = new Schema({
         type: String,
         default:''
     },
+    rider_interest_percentage:{
+        type: Number,
+        default:0
+    },
 });
 
 // // Execute before each user.save() call
