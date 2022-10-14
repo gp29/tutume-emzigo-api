@@ -444,7 +444,7 @@ const getStatement = async(requestParam, req) => {
 const settlement = async(requestParam,)=> {
     return new Promise(async(resolve, reject) => {
         try {
-            await query.updateSingle(dbConstants.dbSchema.riders, {used_balance:0}, {rider_id: requestParam.rider_id});
+            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             resolve({});
             return;
         } catch (error) {
