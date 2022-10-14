@@ -343,7 +343,7 @@ const getStatement = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let fullUrl = req.protocol + '://' + req.get('host');
-            let columnAndValue = {}
+            let columnAndValue = {rider_id: requestParam.rider_id}
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
                     activity_id: new RegExp(requestParam.text, 'i')
