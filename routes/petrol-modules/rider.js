@@ -80,4 +80,13 @@ router.post('/get-statement', async(req, res) => {
     }
 });
 
+router.get('/settlement', async(req, res) => {
+    try {
+        let response = await riderHandler.settlement(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

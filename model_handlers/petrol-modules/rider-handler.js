@@ -427,7 +427,25 @@ const getStatement = async(requestParam, req) => {
             }))
             obj.data = data;
             obj.count = count.length;
+
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, name:1, total_balance:1, used_balance:1}, { created_at: 1 });
+            obj.rider_info = response ? response : {}
+
             resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const settlement = async(requestParam,)=> {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateSingle(dbConstants.dbSchema.riders, {used_balance:0}, {rider_id: requestParam.rider_id});
+            resolve({});
             return;
         } catch (error) {
             console.log(error)
@@ -445,5 +463,6 @@ module.exports = {
     action,
     getAccount,
     updateBalance,
-    getStatement
+    getStatement,
+    settlement
 };
