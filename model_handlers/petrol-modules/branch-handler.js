@@ -9,6 +9,7 @@ const branch_activity = require('./../../models/branch-activity');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
+const LD = require('lodash');
 const timeZone = require('moment-timezone');
 const passwordHandler = require('./../../utils/password-handler');
 const idGenerator = require('./../../utils/id-generator');
@@ -341,6 +342,104 @@ const updateBalance = async(requestParam) => {
     })
 };
 
+const getStatement = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let fullUrl = req.protocol + '://' + req.get('host');
+            let columnAndValue = {}
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    activity_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    type: new RegExp(requestParam.text, 'i')
+                }, {
+                    "riderDetails.name": new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{
+                $lookup: {
+                    from: 'riders',
+                    localField: 'rider_id',
+                    foreignField: 'rider_id',
+                    as: 'riderDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$riderDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id: "$rider_id"
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.branch_activities, joinArr);
+
+            joinArr = [{
+                $lookup: {
+                    from: 'riders',
+                    localField: 'rider_id',
+                    foreignField: 'rider_id',
+                    as: 'riderDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$riderDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    activity_id: 1,
+                    type: 1,
+                    amount: 1,
+                    created_at: 1,
+                    rider: "$riderDetails",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.branch_activities, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            await Promise.all(data.map(async (elem) => {
+                if(elem.rider){
+                    elem.rider = elem.rider.name
+                }
+                else{
+                    elem.rider = 'Admin'
+                }
+                elem.amount = elem.amount+' TZS'
+                elem.type = LD.upperFirst(elem.type)
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+            }))
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 const getRiderDetails = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -387,6 +486,7 @@ const submitAmount = async(requestParam) => {
             }
             await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {branch_id: requestParam.branch_id});
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
+            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             let obj = {
                 branch_id: requestParam.branch_id,
                 rider_id: requestParam.rider_id,
@@ -494,6 +594,7 @@ module.exports = {
     profile,
     getAccount,
     updateBalance,
+    getStatement,
     getRiderDetails,
     submitAmount,
     latestTransaction,

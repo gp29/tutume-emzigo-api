@@ -14,6 +14,7 @@ const timeZone = require('moment-timezone');
 const fs = require('fs');
 const imgHandler = require('./../../model_handlers/image-handler');
 const QRCode = require('qrcode');
+const LD = require('lodash');
 const AWS = require('aws-sdk');
 AWS.config.update({
     accessKeyId: config.aws.keyId,
@@ -265,6 +266,8 @@ const getAccount = async(requestParam, req) => {
                     rider_id: new RegExp(requestParam.text, 'i')
                 }, {
                     name: new RegExp(requestParam.text, 'i')
+                }, {
+                    mobile: new RegExp(requestParam.text, 'i')
                 }];
             }
             let page = requestParam.page ? requestParam.page : 0 ;
@@ -298,6 +301,7 @@ const getAccount = async(requestParam, req) => {
                     rider_id: 1,
                     name: 1,
                     total_balance: 1,
+                    mobile: 1,
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
@@ -335,6 +339,104 @@ const updateBalance = async(requestParam) => {
     })
 };
 
+const getStatement = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let fullUrl = req.protocol + '://' + req.get('host');
+            let columnAndValue = {}
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    activity_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    type: new RegExp(requestParam.text, 'i')
+                }, {
+                    "branchDetails.branch_name": new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{
+                $lookup: {
+                    from: 'branches',
+                    localField: 'branch_id',
+                    foreignField: 'branch_id',
+                    as: 'branchDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$branchDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id: "$rider_id"
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.rider_activities, joinArr);
+
+            joinArr = [{
+                $lookup: {
+                    from: 'branches',
+                    localField: 'branch_id',
+                    foreignField: 'branch_id',
+                    as: 'branchDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$branchDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    activity_id: 1,
+                    type: 1,
+                    amount: 1,
+                    created_at: 1,
+                    branch: "$branchDetails",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.rider_activities, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            await Promise.all(data.map(async (elem) => {
+                if(elem.branch){
+                    elem.branch = elem.branch.branch_name
+                }
+                else{
+                    elem.branch = 'Admin'
+                }
+                elem.amount = elem.amount+' TZS'
+                elem.type = LD.upperFirst(elem.type)
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+            }))
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -342,5 +444,6 @@ module.exports = {
     update,
     action,
     getAccount,
-    updateBalance
+    updateBalance,
+    getStatement
 };

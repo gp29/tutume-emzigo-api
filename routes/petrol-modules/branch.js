@@ -73,6 +73,15 @@ router.post('/update-balance', async(req, res) => {
     }
 });
 
+router.post('/get-statement', async(req, res) => {
+    try {
+        let response = await branchHandler.getStatement(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/signin', async(req, res) => {
     try {
         req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)

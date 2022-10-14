@@ -71,4 +71,13 @@ router.post('/update-balance', async(req, res) => {
     }
 });
 
+router.post('/get-statement', async(req, res) => {
+    try {
+        let response = await riderHandler.getStatement(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;
