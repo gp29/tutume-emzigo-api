@@ -41,6 +41,7 @@ const get = async(requestParam) => {
             if(requestParam.rider_id){
                 response = response[0]
                 response.profile_photo = response.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${response.profile_photo}`}) : ''
+                response.driving_license = response.driving_license != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${response.driving_license}`}) : ''
                 resolve(response);
                 return;
             }
@@ -139,6 +140,9 @@ const create = async(requestParam, req) => {
                 if(req.files.profile_photo){
                     requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.riderBucket)
                 }
+                if(req.files.driving_license){
+                    requestParam.driving_license = await imgHandler.uploadImage(req.files.driving_license, config.aws.s3.riderBucket)
+                }
             }
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
             QRCode.toDataURL(res.rider_id, async function(err, url) {
@@ -202,7 +206,7 @@ const update = async(requestParam, req) => {
                 reject(errors(labels.LBL_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, profile_photo:1}, { created_at: 1 });
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, profile_photo:1, driving_license:1}, { created_at: 1 });
             if (requestParam.change_logo) {
                 const objects = [{
                     Key: `emzigo/riders/${rider.profile_photo}`
@@ -212,6 +216,16 @@ const update = async(requestParam, req) => {
             }
             else{
                 delete requestParam.profile_photo
+            }
+            if (requestParam.change_license) {
+                const objects = [{
+                    Key: `emzigo/riders/${rider.driving_license}`
+                }];
+                await imgHandler.deleteImage(objects, config.aws.bucketName)
+                requestParam.driving_license = await imgHandler.uploadImage(req.files.driving_license, config.aws.s3.riderBucket)
+            }
+            else{
+                delete requestParam.driving_license
             }
             delete requestParam.qrcode
             delete requestParam.qrcode_pdf
@@ -230,7 +244,7 @@ const action = async(requestParam) => {
         try {
             if (requestParam['type']== "delete") {
                 let objects = []
-                let response = await query.selectWithAnd(dbConstants.dbSchema.riders, {rider_id: {$in: requestParam.ids}}, { _id: 0, rider_id:1, qrcode:1, qrcode_pdf:1, profile_photo:1}, { created_at: 1 });
+                let response = await query.selectWithAnd(dbConstants.dbSchema.riders, {rider_id: {$in: requestParam.ids}}, { _id: 0, rider_id:1, qrcode:1, qrcode_pdf:1, profile_photo:1, driving_license:1}, { created_at: 1 });
                 await Promise.all(response.map(async (elem) => {
                     objects = [{
                         Key: `emzigo/qrcodes/${elem.qrcode}`
@@ -238,6 +252,8 @@ const action = async(requestParam) => {
                         Key: `emzigo/qrcodes/${elem.qrcode_pdf}`
                     }, {
                         Key: `emzigo/riders/${elem.profile_photo}`
+                    }, {
+                        Key: `emzigo/riders/${elem.driving_license}`
                     }];
                     fs.unlinkSync('./public/qrcodes/'+elem.rider_id+'.pdf')
                 }))
@@ -445,7 +461,7 @@ const settlement = async(requestParam,)=> {
     return new Promise(async(resolve, reject) => {
         try {
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
-            requestParam.type = 'deduct'
+            requestParam.type = 'paid'
             requestParam.by_whom = 'rider'
             requestParam.by_whom_id = requestParam.rider_id
             await query.insertSingle(dbConstants.dbSchema.rider_activities, requestParam);

@@ -29,6 +29,14 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    driving_license: {
+        type: String,
+        default:''
+    },
+    nida_number: {
+        type: String,
+        default:''
+    },
     qrcode: {
         type: String,
         default:''
