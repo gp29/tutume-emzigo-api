@@ -25,5 +25,6 @@ module.exports = {
         branch_activities: 'Branch_activity',
         riders: 'Rider',
         rider_activities: 'Rider_activity',
+        kijiwes: 'Kijiwe',
     }
 };

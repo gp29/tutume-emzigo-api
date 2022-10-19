@@ -53,6 +53,22 @@ var riderSchema = new Schema({
         type: Number,
         default:0
     },
+    region_id: {
+        type: String,
+        default:''
+    },
+    kijiwe_id: {
+        type: String,
+        default:''
+    },
+    referee_name: {
+        type: String,
+        default:''
+    },
+    referee_contact_number: {
+        type: String,
+        default:''
+    },
     created_at: {
         type: Date,
         default: Date.now

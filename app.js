@@ -88,6 +88,7 @@ app.use('/api/region', region);
 app.use('/api/head-quarter', require('./routes/petrol-modules/head-quarter'));
 app.use('/api/branch', require('./routes/petrol-modules/branch'));
 app.use('/api/rider', require('./routes/petrol-modules/rider'));
+app.use('/api/kijiwe', require('./routes/petrol-modules/kijiwe'));
 
 app.use(upload());
 
