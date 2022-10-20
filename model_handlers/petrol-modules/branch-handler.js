@@ -26,7 +26,7 @@ const get = async(requestParam) => {
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
-            let response = await query.selectWithAnd(dbConstants.dbSchema.branches, columnValue, { _id: 0}, { created_at: 1 });
+            let response = await query.selectWithAnd(dbConstants.dbSchema.branches, columnValue, { _id: 0, password:0}, { created_at: 1 });
             if(requestParam.branch_id){
                 response = response[0]
                 resolve(response);
@@ -168,6 +168,9 @@ const generateRegId = async() => {
 const update = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
+            if(requestParam.password){
+                requestParam.password = await passwordHandler.encrypt(requestParam.password.toString());
+            }
             await query.updateSingle(dbConstants.dbSchema.branches, requestParam, {branch_id: requestParam.branch_id});
             resolve({});
             return;
