@@ -407,7 +407,9 @@ const updateJobBackend = async(requestParam, req) => {
                 }
             }
             else{
-                delete requestParam.item_image
+                if(requestParam.item_image != ''){
+                    delete requestParam.item_image
+                }
             }
             let job = await customerHandler.updateJob(requestParam)
             resolve({});

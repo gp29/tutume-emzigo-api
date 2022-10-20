@@ -173,15 +173,20 @@ const update = async(requestParam, req) => {
                 return;
             }
             let customer = await query.selectWithAndOne(dbConstants.dbSchema.customers, {customer_id: requestParam.customer_id}, { _id: 0, profile_photo:1}, { created_at: 1 });
+            const objects = [{
+                Key: `emzigo/customers/${customer.profile_photo}`
+            }];
             if (requestParam.change_logo) {
-                const objects = [{
-                    Key: `emzigo/customers/${customer.profile_photo}`
-                }];
                 await imgHandler.deleteImage(objects, config.aws.bucketName)
                 requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.customerBucket)
             }
             else{
-                delete requestParam.profile_photo
+                if(requestParam.profile_photo != ''){
+                    delete requestParam.profile_photo
+                }
+                else{
+                    await imgHandler.deleteImage(objects, config.aws.bucketName)
+                }
             }
             await query.updateSingle(dbConstants.dbSchema.customers, requestParam, {customer_id: requestParam.customer_id});
             resolve({});
