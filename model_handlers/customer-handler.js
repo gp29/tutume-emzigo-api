@@ -11,6 +11,7 @@ const labels = require('./../utils/labels.json');
 const responseCodes = require('./../utils/response-codes');
 const timeZone = require('moment-timezone');
 const moment = require('moment');
+const request = require('request');
 const imgHandler = require('./../model_handlers/image-handler');
 const distance = require('google-distance');
 distance.apiKey = config.google_key;
@@ -546,7 +547,18 @@ const createJob = async(requestParam) => {
             if(!requestParam.transaction_id){
                 requestParam.transaction_id = 'TRA'+moment().unix()
             }
-            await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
+            let job = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
+            let msg = "New Order received, order number: "+job.job_id
+            let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=713435839&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
+            url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=746146902&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
             resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
