@@ -610,6 +610,17 @@ const createOrder = async(requestParam) => {
                 requestParam.delivery_longitude = del_res[0].longitude
             }
             let ord = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
+            let msg = "New Order received, order number: "+ord.job_id
+            let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=713435839&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
+            url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=746146902&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
             resolve({job_id: ord.job_id});
             return;
         } catch (error) {
