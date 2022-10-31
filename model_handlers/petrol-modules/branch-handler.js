@@ -466,6 +466,27 @@ const getRiderDetails = async(requestParam) => {
     })
 };
 
+const verifyPin = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, pin:1} );
+            if(!rider){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            if(rider.pin != requestParam.pin){
+                reject(errors(labels.LBL_INVALID_PIN[config.default_language], responseCodes.Conflict));
+                return;
+            }
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 const submitAmount = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -601,5 +622,6 @@ module.exports = {
     getRiderDetails,
     submitAmount,
     latestTransaction,
-    history
+    history,
+    verifyPin
 };

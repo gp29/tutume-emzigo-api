@@ -158,6 +158,25 @@ router.post('/submit-amount', async(req, res) => {
     }
 });
 
+router.post('/verify-pin', async(req, res) => {
+    try {
+        req.body = await encryptDecryptHandler.decryptJson(req.body.encrypt_data)
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
+        if (!req.body.rider_id || !req.body.pin) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await branchHandler.verifyPin(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.get('/latest-transaction', async(req, res) => {
     try {
         req.query = await encryptDecryptHandler.decryptJson(req.query.encrypt_data)

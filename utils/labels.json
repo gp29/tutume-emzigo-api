@@ -20,6 +20,9 @@
     "LBL_INVALID_OTP": {
         "EN": "Invalid OTP"
     },
+    "LBL_INVALID_PIN": {
+        "EN": "Invalid PIN"
+    },
     "LBL_EMAIL_OR_MOBILE_ALREADY_EXISTS": {
         "EN": "Email or Mobile already exists in our system"
     },

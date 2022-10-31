@@ -1851,6 +1851,47 @@
                 }],
                 "operationId": "PetrolController.LatestTransaction"
             }
+        },
+        "/branch/verify-pin": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "VerifyPin",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "VerifyPin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "rider_id": {
+                                        "type": "string"
+                                    },
+                                    "pin": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.VerifyPin"
+            }
         }
     },
     "components": {},
