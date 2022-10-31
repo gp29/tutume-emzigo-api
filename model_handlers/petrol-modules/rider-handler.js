@@ -13,6 +13,7 @@ const moment = require('moment');
 const timeZone = require('moment-timezone');
 const fs = require('fs');
 const imgHandler = require('./../../model_handlers/image-handler');
+const idGenerator = require('./../../utils/id-generator');
 const QRCode = require('qrcode');
 const LD = require('lodash');
 const AWS = require('aws-sdk');
@@ -104,17 +105,19 @@ const getSort = async(requestParam, req) => {
                     email: "$email",
                     mobile: "$mobile",
                     created_at: "$created_at",
-                    qrcode: "$qrcode",
-                    qrcode_pdf: "$qrcode_pdf",
+                    account_number: "$account_number",
+                    pin: "$pin",
+                    // qrcode: "$qrcode",
+                    // qrcode_pdf: "$qrcode_pdf",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
             _.each(data, (elem) => {
                 elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
-                elem.qrcode = elem.qrcode != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode : ''
-                //elem.qrcode_pdf = elem.qrcode_pdf != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode_pdf : ''
-                elem.qrcode_pdf = elem.qrcode_pdf != '' ? fullUrl+'/qrcodes/'+elem.rider_id+'.pdf' : ''
+                // elem.qrcode = elem.qrcode != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode : ''
+                // //elem.qrcode_pdf = elem.qrcode_pdf != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode_pdf : ''
+                // elem.qrcode_pdf = elem.qrcode_pdf != '' ? fullUrl+'/qrcodes/'+elem.rider_id+'.pdf' : ''
             })
             obj.data = data;
             obj.count = count.length;
@@ -144,48 +147,71 @@ const create = async(requestParam, req) => {
                     requestParam.driving_license = await imgHandler.uploadImage(req.files.driving_license, config.aws.s3.riderBucket)
                 }
             }
+            requestParam.account_number = await generateAccountNumber();
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
-            QRCode.toDataURL(res.rider_id, async function(err, url) {
-                if(err){
-                    reject(errors(labels.LBL_INTERNAL_SERVER[config.default_language], responseCodes.InternalServer));
-                    return;
-                }
-                let pdf_url = url
-                let buf = new Buffer(url.replace(/^data:image\/\w+;base64,/, ""), 'base64');
-                let id = Math.random().toString(36).substring(7) + moment().unix() + '.jpg';
-                let data = {
-                    Key: id,
-                    Body: buf,
-                    ContentEncoding: 'base64',
-                    ContentType: 'image/jpeg',
-                    ACL: 'public-read'
-                };
-                qrcodeBucket.putObject(data, async function(err, data) {
-                    if(err){
-                        reject(errors(labels.LBL_INTERNAL_SERVER[config.default_language], responseCodes.InternalServer));
-                        return;
-                    }
-                    requestParam.qrcode = id
+            resolve({});
+            return;
+            // QRCode.toDataURL(res.rider_id, async function(err, url) {
+            //     if(err){
+            //         reject(errors(labels.LBL_INTERNAL_SERVER[config.default_language], responseCodes.InternalServer));
+            //         return;
+            //     }
+            //     let pdf_url = url
+            //     let buf = new Buffer(url.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+            //     let id = Math.random().toString(36).substring(7) + moment().unix() + '.jpg';
+            //     let data = {
+            //         Key: id,
+            //         Body: buf,
+            //         ContentEncoding: 'base64',
+            //         ContentType: 'image/jpeg',
+            //         ACL: 'public-read'
+            //     };
+            //     qrcodeBucket.putObject(data, async function(err, data) {
+            //         if(err){
+            //             reject(errors(labels.LBL_INTERNAL_SERVER[config.default_language], responseCodes.InternalServer));
+            //             return;
+            //         }
+            //         requestParam.qrcode = id
 
-                    // FOR PDF CREATE
-                    const PDFDocument = require('pdfkit');
-                    const blobStream = require('blob-stream');
-                    let pdfDoc = new PDFDocument;
-                    const stream = pdfDoc.pipe(blobStream());
-                    pdfDoc.pipe(fs.createWriteStream('./public/qrcodes/'+res.rider_id+'.pdf'));
-                    pdfDoc.fontSize(25).text(requestParam.name, {align:'center'})
-                    pdfDoc.image(pdf_url, {width: 400, height:400, align:'center', valign:'center'});
-                    pdfDoc.end();
-                    // FOR PDF CREATE
-                    stream.on('finish', async function() {
-                        requestParam.qrcode_pdf = await imgHandler.uploadPdf('./public/qrcodes/'+res.rider_id+'.pdf', config.aws.s3.qrcodeBucket)
-                        await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: res.rider_id});
-                        //fs.unlinkSync('./public/qrcodes/'+res.rider_id+'.pdf')
-                        resolve({});
-                        return;
-                    });
-                })
-            });
+            //         // FOR PDF CREATE
+            //         const PDFDocument = require('pdfkit');
+            //         const blobStream = require('blob-stream');
+            //         let pdfDoc = new PDFDocument;
+            //         const stream = pdfDoc.pipe(blobStream());
+            //         pdfDoc.pipe(fs.createWriteStream('./public/qrcodes/'+res.rider_id+'.pdf'));
+            //         pdfDoc.fontSize(25).text(requestParam.name, {align:'center'})
+            //         pdfDoc.image(pdf_url, {width: 400, height:400, align:'center', valign:'center'});
+            //         pdfDoc.end();
+            //         // FOR PDF CREATE
+            //         stream.on('finish', async function() {
+            //             requestParam.qrcode_pdf = await imgHandler.uploadPdf('./public/qrcodes/'+res.rider_id+'.pdf', config.aws.s3.qrcodeBucket)
+            //             await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: res.rider_id});
+            //             //fs.unlinkSync('./public/qrcodes/'+res.rider_id+'.pdf')
+            //             resolve({});
+            //             return;
+            //         });
+            //     })
+            // });
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const generateAccountNumber = async() => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let account_number = await idGenerator.generateString(5, true, false, false); 
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {account_number}, { _id: 0}, { created_at: 1 });
+            if(response){
+                resolve(generateAccountNumber());
+                return;
+            }else{
+                resolve(account_number);
+                return;
+            }
         } catch (error) {
             console.log(error)
             reject(error)
@@ -206,7 +232,7 @@ const update = async(requestParam, req) => {
                 reject(errors(labels.LBL_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, profile_photo:1, driving_license:1}, { created_at: 1 });
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, profile_photo:1, driving_license:1, account_number:1}, { created_at: 1 });
             if (requestParam.change_logo) {
                 const objects = [{
                     Key: `emzigo/riders/${rider.profile_photo}`
@@ -229,6 +255,9 @@ const update = async(requestParam, req) => {
             }
             delete requestParam.qrcode
             delete requestParam.qrcode_pdf
+            if(!rider.account_number || rider.account_number == 0){
+                requestParam.account_number = await generateAccountNumber();
+            }
             await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: requestParam.rider_id});
             resolve({});
             return;
@@ -255,7 +284,7 @@ const action = async(requestParam) => {
                     }, {
                         Key: `emzigo/riders/${elem.driving_license}`
                     }];
-                    fs.unlinkSync('./public/qrcodes/'+elem.rider_id+'.pdf')
+                    //fs.unlinkSync('./public/qrcodes/'+elem.rider_id+'.pdf')
                 }))
                 await imgHandler.deleteImage(objects, config.aws.bucketName)
                 await query.removeMultiple(dbConstants.dbSchema.riders, { rider_id: { $in: requestParam['ids']}});
@@ -484,5 +513,6 @@ module.exports = {
     getAccount,
     updateBalance,
     getStatement,
-    settlement
+    settlement,
+    generateAccountNumber
 };

@@ -69,6 +69,14 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    account_number: {
+        type: Number,
+        default:0
+    },
+    pin: {
+        type: Number,
+        default:0
+    },
     created_at: {
         type: Date,
         default: Date.now

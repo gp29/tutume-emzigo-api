@@ -451,9 +451,9 @@ const getRiderDetails = async(requestParam) => {
                 reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, name:1, mobile:1, total_balance:1, email:1, profile_photo:1} );
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {account_number:requestParam.rider_id}, { _id:0, rider_id:1, name:1, mobile:1, total_balance:1, email:1, profile_photo:1} );
             if(!rider){
-                reject(errors(labels.LBL_INVALID_QR_CODE_VALUE[config.default_language], responseCodes.Conflict));
+                reject(errors(labels.LBL_INVALID_ACCOUNT_NUMBER[config.default_language], responseCodes.Conflict));
                 return;
             }
             rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''

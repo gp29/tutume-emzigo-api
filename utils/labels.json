@@ -62,6 +62,9 @@
     "LBL_INVALID_QR_CODE_VALUE": {
         "EN": "Invalid QR code value."
     },
+    "LBL_INVALID_ACCOUNT_NUMBER": {
+        "EN": "Invalid account number you have entered."
+    },
     "LBL_AMOUNT_NOT_MORE_THEN_RIDER_BALANCE": {
         "EN": "Rider don't have to sufficient balance."
     },
