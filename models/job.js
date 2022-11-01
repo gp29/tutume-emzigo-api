@@ -220,6 +220,10 @@ var jobSchema = new Schema({
         type: String,
         default:'false'
     },
+    cancel_reason: {
+        type: String,
+        default:''
+    },
     created_at: {
         type: Date,
         default: Date.now

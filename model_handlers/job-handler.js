@@ -64,6 +64,13 @@ const getSort = async(requestParam) => {
                     'delivery_address': new RegExp(requestParam.text, 'i')
                 }];
             }
+            if(requestParam.date){
+                let date = timeZone(new Date(requestParam.date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                columnAndValue.created_at = {
+                    $lte: new Date(date+'T23:59:59.000Z'),
+                    $gte: new Date(date+'T00:00:00.000Z')
+                }
+            }
             let page = requestParam.page ? requestParam.page : 0 ;
             let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
             let skip = page * sizePerPage;
@@ -209,6 +216,7 @@ const getSort = async(requestParam) => {
                     paid_status: 1,
                     otp: 1,
                     is_send_noti: 1,
+                    cancel_reason: 1,
                     customer: "$cusDetails.name",
                     provider: "$proDetails",
                     vehicle: "$vehDetails.name",
@@ -246,6 +254,137 @@ const getSort = async(requestParam) => {
             obj.data = data;
             obj.count = count.length;
             resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const getExport = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {}
+            if(requestParam.status){
+                columnAndValue.status = requestParam.status
+            }
+            if(requestParam.date && requestParam.date != 'null'){
+                let date = timeZone(new Date(requestParam.date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                columnAndValue.created_at = {
+                    $lte: new Date(date+'T23:59:59.000Z'),
+                    $gte: new Date(date+'T00:00:00.000Z')
+                }
+            }
+
+            let joinArr = [{
+                $lookup: {
+                    from: 'customers',
+                    localField: 'customer_id',
+                    foreignField: 'customer_id',
+                    as: 'cusDetails',
+                },
+            }, {
+                $unwind: "$cusDetails"
+            }, {
+                $lookup: {
+                    from: 'providers',
+                    localField: 'provider_id',
+                    foreignField: 'provider_id',
+                    as: 'proDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$proDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, {
+                $lookup: {
+                    from: 'vehicles',
+                    localField: 'vehicle_id',
+                    foreignField: 'vehicle_id',
+                    as: 'vehDetails',
+                },
+            }, {
+                $unwind: "$vehDetails"
+            }, {
+                $lookup: {
+                    from: 'delivery_options',
+                    localField: 'delivery_option_id',
+                    foreignField: 'delivery_option_id',
+                    as: 'delDetails',
+                },
+            }, {
+                $unwind: "$delDetails"
+            }, {
+                $lookup: {
+                    from: 'regions',
+                    localField: 'region_id',
+                    foreignField: 'region_id',
+                    as: 'regDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$regDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
+            }, { 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    job_id: 1,
+                    total: 1,
+                    discount: 1,
+                    amount_pay: 1,
+                    transaction_id: 1,
+                    payment_type: 1,
+                    created_at: 1,
+                    delivered_at: 1,
+                    item_name: 1,
+                    item_desc: 1,
+                    pickup_address: 1,
+                    delivery_address: 1,
+                    paid_status: 1,
+                    otp: 1,
+                    is_send_noti: 1,
+                    customer: "$cusDetails.name",
+                    provider: "$proDetails",
+                    vehicle: "$vehDetails.name",
+                    delivery_option: "$delDetails.name",
+                    region: "$regDetails",
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+
+            let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id: 0, currency:1}, { created_at: 1 });
+            let currency = settings ? settings.currency : 'TZS'
+
+            _.each(data, (elem) => {
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+                elem.delivered_at = elem.delivered_at ? timeZone(new Date(elem.delivered_at)).tz(requestParam.time_zone).format('lll') : ''
+                elem.total = elem.total +' '+ currency
+                elem.discount = elem.discount +' '+ currency
+                elem.amount_pay = elem.amount_pay +' '+ currency
+                if(elem.provider){
+                    elem.provider = elem.provider.name
+                }
+                else{
+                    elem.provider = ''
+                }
+                if(elem.region){
+                    elem.region = elem.region.name
+                }
+                else{
+                    elem.region = ''
+                }
+                if(!elem.otp || elem.otp == 0) elem.otp = ''
+            })
+            resolve(data);
             return;
         } catch (error) {
             console.log(error)
@@ -433,7 +572,11 @@ const action = async(requestParam) => {
                     await query.updateMultiple(dbConstants.dbSchema.jobs, {paid_status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
                 }
                 else{
-                    await query.updateMultiple(dbConstants.dbSchema.jobs, {status: requestParam.type}, {job_id: { $in: requestParam['ids']}});
+                    let columnAndValue = {status: requestParam.type}
+                    if(requestParam.cancel_reason && requestParam.cancel_reason != ''){
+                        columnAndValue.cancel_reason = requestParam.cancel_reason
+                    }
+                    await query.updateMultiple(dbConstants.dbSchema.jobs, columnAndValue, {job_id: { $in: requestParam['ids']}});
                 }
             }
             resolve({});
@@ -743,6 +886,7 @@ const getProviderReports = async(requestParam) => {
 module.exports = {
     get,
     getSort,
+    getExport,
     details,
     createJobBackend,
     updateJobBackend,

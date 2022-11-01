@@ -116,4 +116,13 @@ router.post('/send-notification-accept', async(req, res) => {
     }
 });
 
+router.get('/get-export', async(req, res) => {
+    try {
+        let response = await jobHandler.getExport(req.query);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;
