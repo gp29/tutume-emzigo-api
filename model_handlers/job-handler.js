@@ -64,11 +64,12 @@ const getSort = async(requestParam) => {
                     'delivery_address': new RegExp(requestParam.text, 'i')
                 }];
             }
-            if(requestParam.date){
-                let date = timeZone(new Date(requestParam.date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+            if(requestParam.from_date && requestParam.to_date){
+                let from_date = timeZone(new Date(requestParam.from_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                let to_date = timeZone(new Date(requestParam.to_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
                 columnAndValue.created_at = {
-                    $lte: new Date(date+'T23:59:59.000Z'),
-                    $gte: new Date(date+'T00:00:00.000Z')
+                    $lte: new Date(to_date+'T23:59:59.000Z'),
+                    $gte: new Date(from_date+'T00:00:00.000Z')
                 }
             }
             let page = requestParam.page ? requestParam.page : 0 ;
@@ -270,11 +271,16 @@ const getExport = async(requestParam) => {
             if(requestParam.status){
                 columnAndValue.status = requestParam.status
             }
-            if(requestParam.date && requestParam.date != 'null'){
-                let date = timeZone(new Date(requestParam.date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
-                columnAndValue.created_at = {
-                    $lte: new Date(date+'T23:59:59.000Z'),
-                    $gte: new Date(date+'T00:00:00.000Z')
+            if(requestParam.status == 'delivered'){
+                if(requestParam.from_date && requestParam.to_date){
+                    if(requestParam.from_date != 'null' && requestParam.to_date != 'null'){
+                        let from_date = timeZone(new Date(requestParam.from_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                        let to_date = timeZone(new Date(requestParam.to_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                        columnAndValue.created_at = {
+                            $lte: new Date(to_date+'T23:59:59.000Z'),
+                            $gte: new Date(from_date+'T00:00:00.000Z')
+                        }
+                    }
                 }
             }
 
