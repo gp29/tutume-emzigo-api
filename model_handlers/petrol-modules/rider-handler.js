@@ -489,7 +489,12 @@ const getStatement = async(requestParam, req) => {
 const settlement = async(requestParam,)=> {
     return new Promise(async(resolve, reject) => {
         try {
-            await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
+            if(parseFloat(requestParam.total_amount_to_pay) == parseFloat(requestParam.amount)){
+                await query.updateSingle(dbConstants.dbSchema.riders, {used_balance: 0}, {rider_id: requestParam.rider_id});
+            }
+            else{
+                await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
+            }
             requestParam.type = 'paid'
             requestParam.by_whom = 'rider'
             requestParam.by_whom_id = requestParam.rider_id
