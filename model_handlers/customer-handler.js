@@ -17,6 +17,7 @@ const distance = require('google-distance');
 distance.apiKey = config.google_key;
 const encryptDecryptHandler = require('./../model_handlers/encrypt-decrypt-handler');
 const passwordHandler = require('./../utils/password-handler');
+const idGenerator = require('./../utils/id-generator');
 
 const NodeGeocoder = require('node-geocoder');
 const geocoder = NodeGeocoder({
@@ -547,6 +548,7 @@ const createJob = async(requestParam) => {
             if(!requestParam.transaction_id){
                 requestParam.transaction_id = 'TRA'+moment().unix()
             }
+            requestParam.job_id = await generateJobID();
             let job = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             let msg = "New Order received, order number: "+job.job_id
             let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=713435839&msgtext="+msg
@@ -609,6 +611,7 @@ const createOrder = async(requestParam) => {
                 requestParam.delivery_latitude = del_res[0].latitude
                 requestParam.delivery_longitude = del_res[0].longitude
             }
+            requestParam.job_id = await generateJobID();
             let ord = await query.insertSingle(dbConstants.dbSchema.jobs, requestParam);
             let msg = "New Order received, order number: "+ord.job_id
             let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Tutumeltd&CountryCode=255&mobileno=713435839&msgtext="+msg
@@ -624,6 +627,26 @@ const createOrder = async(requestParam) => {
             resolve({job_id: ord.job_id});
             return;
         } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
+const generateJobID = async() => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let job_id = await idGenerator.generateId('ORD')
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id}, { _id: 0}, { created_at: 1 });
+            if(response){
+                resolve(generateJobID());
+                return;
+            }else{
+                resolve(job_id);
+                return;
+            }
+        } catch (error) {
+            console.log(error)
             reject(error)
             return
         }
@@ -1098,6 +1121,7 @@ module.exports = {
     checkPrice,
     createJob,
     createOrder,
+    generateJobID,
     updateJob,
     changePassword,
     logoutDelete,

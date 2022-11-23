@@ -235,9 +235,9 @@ var jobSchema = new Schema({
 });
 
 // // Execute before each user.save() call
-jobSchema.pre('save', async function(callback) {
-    this.job_id = await idGenerator.generateId('ORD'); 
-});
+// jobSchema.pre('save', async function(callback) {
+//     this.job_id = await idGenerator.generateId('ORD'); 
+// });
 
 let Job = mongoose.model('Job', jobSchema);
 module.exports = Job;
