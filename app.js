@@ -38,6 +38,8 @@ const coupon = require('./routes/coupon');
 const job = require('./routes/job');
 const role = require('./routes/role');
 const region = require('./routes/region');
+const status = require('./routes/status');
+const company = require('./routes/company');
 
 //other configurations
 const passport = require('passport');
@@ -85,6 +87,8 @@ app.use('/api/coupon', coupon);
 app.use('/api/job', job);
 app.use('/api/role', role);
 app.use('/api/region', region);
+app.use('/api/status', status);
+app.use('/api/company', company);
 app.use('/api/head-quarter', require('./routes/petrol-modules/head-quarter'));
 app.use('/api/branch', require('./routes/petrol-modules/branch'));
 app.use('/api/rider', require('./routes/petrol-modules/rider'));

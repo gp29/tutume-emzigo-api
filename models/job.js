@@ -224,6 +224,14 @@ var jobSchema = new Schema({
         type: String,
         default:''
     },
+    company_id: {
+        type: String,
+        default:''
+    },
+    status_id: {
+        type: String,
+        default:''
+    },
     created_at: {
         type: Date,
         default: Date.now

@@ -26,5 +26,7 @@ module.exports = {
         riders: 'Rider',
         rider_activities: 'Rider_activity',
         kijiwes: 'Kijiwe',
+        statuses: 'Status',
+        companies: 'Company',
     }
 };

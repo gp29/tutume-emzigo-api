@@ -33,6 +33,15 @@ router.post('/get-sort', async(req, res) => {
     }
 });
 
+router.post('/get-company-report', async(req, res) => {
+    try {
+        let response = await jobHandler.getCompanyReports(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 router.post('/get-coupon-reports', async(req, res) => {
     try {
         let response = await jobHandler.getCouponReports(req.body);
@@ -83,6 +92,24 @@ router.post('/assign-provider', async(req, res) => {
 router.post('/assign-region', async(req, res) => {
     try {
         let response = await jobHandler.assignRegion(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/assign-company', async(req, res) => {
+    try {
+        let response = await jobHandler.assignCompany(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/assign-status', async(req, res) => {
+    try {
+        let response = await jobHandler.assignStatus(req.body);
         jsonResponse(res, responseCodes.OK, null, response);
     } catch (error) {
         jsonResponse(res, error.code, error, null);
