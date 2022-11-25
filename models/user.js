@@ -13,6 +13,10 @@ var userSchema = new Schema({
         type: String,
         default:''
     },
+    company_id: {
+        type: String,
+        default:''
+    },
     name: {
         type: String,
         default:''
