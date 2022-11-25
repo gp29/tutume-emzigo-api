@@ -357,6 +357,18 @@ const getCompanyReports = async(requestParam) => {
                     "path": "$regDetails",
                     "preserveNullAndEmptyArrays": true
                 }
+            }, {
+                $lookup: {
+                    from: 'statuses',
+                    localField: 'status_id',
+                    foreignField: 'status_id',
+                    as: 'statusDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$statusDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -420,6 +432,18 @@ const getCompanyReports = async(requestParam) => {
                     "path": "$regDetails",
                     "preserveNullAndEmptyArrays": true
                 }
+            }, {
+                $lookup: {
+                    from: 'status',
+                    localField: 'status_id',
+                    foreignField: 'status_id',
+                    as: 'statusDetails',
+                },
+            }, {
+                "$unwind": {
+                    "path": "$statusDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -452,6 +476,7 @@ const getCompanyReports = async(requestParam) => {
                     vehicle: "$vehDetails.name",
                     delivery_option: "$delDetails.name",
                     region: "$regDetails",
+                    status_id:"$statusDetails"
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.jobs, joinArr);
@@ -477,6 +502,12 @@ const getCompanyReports = async(requestParam) => {
                 }
                 else{
                     elem.region = ''
+                }
+                if(elem.status_id){
+                    elem.status_id = elem.status_id.title
+                }
+                else{
+                    elem.status_id = ''
                 }
                 if(!elem.otp || elem.otp == 0) elem.otp = ''
             })
@@ -915,9 +946,11 @@ const assignStatus = async(requestParam) => {
 const updatePrice = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.jobs, {job_id:requestParam.ids[0]}, { _id:0, customer_id: 1, job_id:1, discount:1, total:1} );
             if(response){
-                await query.updateMultiple(dbConstants.dbSchema.jobs, {amount_pay: parseFloat(requestParam.price)}, {job_id: requestParam.ids[0]});
+                let amount_pay = parseFloat(requestParam.price)
+                let total = amount_pay + parseFloat(response.discount)
+                await query.updateMultiple(dbConstants.dbSchema.jobs, {amount_pay, total}, {job_id: requestParam.ids[0]});
                 sendNotificationCustomer({customer_id: response.customer_id, title:'Price updated', code:'UPDATE_PRICE'})
             }
             resolve({});
