@@ -5,9 +5,14 @@ const entropy = new Entropy()
 
 const generateId = (label = '')=> {
     return new Promise((resolve) => {
-        //resolve(`${label}${moment().unix()}${Math.floor((Math.random() * 99) + 11)}`);
-        resolve(`${label}${moment().unix()}${entropy.smallID()}`);
-        return;
+        if(label == 'ORD'){
+            resolve(`${label}${moment().unix()}${Math.floor((Math.random() * 99) + 11)}`);
+            return
+        }
+        else{
+            resolve(`${label}${moment().unix()}${entropy.smallID()}`);
+            return;
+        }
     })
 };
 
