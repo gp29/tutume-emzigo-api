@@ -107,18 +107,21 @@ const getSort = async(requestParam, req) => {
                     created_at: "$created_at",
                     account_number: "$account_number",
                     pin: "$pin",
+                    vehicle_id: "$vehicle_id",
                     // qrcode: "$qrcode",
                     // qrcode_pdf: "$qrcode_pdf",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
-            _.each(data, (elem) => {
+            await Promise.all(data.map(async (elem) => {
                 elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
                 // elem.qrcode = elem.qrcode != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode : ''
                 // //elem.qrcode_pdf = elem.qrcode_pdf != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode_pdf : ''
                 // elem.qrcode_pdf = elem.qrcode_pdf != '' ? fullUrl+'/qrcodes/'+elem.rider_id+'.pdf' : ''
-            })
+                let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.panda_vehicles, {vehicle_id: elem.vehicle_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.vehicle_name = vehicle ? vehicle.name : ''
+            }))
             obj.data = data;
             obj.count = count.length;
             resolve(obj);

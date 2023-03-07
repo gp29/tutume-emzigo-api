@@ -28,5 +28,6 @@ module.exports = {
         kijiwes: 'Kijiwe',
         statuses: 'Status',
         companies: 'Company',
+        panda_vehicles: 'Panda_vehicle',
     }
 };

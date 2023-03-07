@@ -61,6 +61,10 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    vehicle_id: {
+        type: String,
+        default:''
+    },
     referee_name: {
         type: String,
         default:''
