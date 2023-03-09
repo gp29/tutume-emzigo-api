@@ -62,7 +62,10 @@ const getSort = async(requestParam) => {
                     as: 'productDetails',
                 },
             }, {
-                $unwind: "$productDetails"
+                "$unwind": {
+                    "path": "$productDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -83,7 +86,10 @@ const getSort = async(requestParam) => {
                     as: 'productDetails',
                 },
             }, {
-                $unwind: "$productDetails"
+                "$unwind": {
+                    "path": "$productDetails",
+                    "preserveNullAndEmptyArrays": true
+                }
             }, { 
                 $match : columnAndValue
             }, { 
@@ -98,11 +104,14 @@ const getSort = async(requestParam) => {
                     head_quarter_id: "$head_quarter_id",
                     name: "$name",
                     status: "$status",
-                    product: "$productDetails.name",
+                    product: "$productDetails",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.head_quarters, joinArr);
             data = JSON.parse(JSON.stringify(data))
+            _.each(data, (elem) => {
+                elem.product = elem.product ? elem.product.name : ''
+            })
             obj.data = data;
             obj.count = count.length;
             resolve(obj);
