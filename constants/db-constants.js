@@ -29,5 +29,6 @@ module.exports = {
         statuses: 'Status',
         companies: 'Company',
         panda_vehicles: 'Panda_vehicle',
+        products: 'Product',
     }
 };

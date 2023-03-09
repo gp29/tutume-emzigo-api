@@ -4,7 +4,7 @@ const config = require('./../../config');
 const errors = require('./../../utils/dz-errors');
 const dbConstants = require('./../../constants/db-constants');
 const query = require('./../../utils/query-creator');
-const headquarter = require('./../../models/head-quarter');
+const product = require('./../../models/product');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
@@ -14,14 +14,14 @@ const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let columnValue = {}
-            if(requestParam.head_quarter_id){
-                columnValue.head_quarter_id = requestParam.head_quarter_id
+            if(requestParam.product_id){
+                columnValue.product_id = requestParam.product_id
             }
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
-            let response = await query.selectWithAnd(dbConstants.dbSchema.head_quarters, columnValue, { _id: 0}, { created_at: 1 });
-            if(requestParam.head_quarter_id){
+            let response = await query.selectWithAnd(dbConstants.dbSchema.products, columnValue, { _id: 0}, { created_at: 1 });
+            if(requestParam.product_id){
                 response = response[0]
                 resolve(response);
                 return;
@@ -42,9 +42,13 @@ const getSort = async(requestParam) => {
             let columnAndValue = {}
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
-                    head_quarter_id: new RegExp(requestParam.text, 'i')
+                    product_id: new RegExp(requestParam.text, 'i')
                 }, {
                     name: new RegExp(requestParam.text, 'i')
+                }, {
+                    description: new RegExp(requestParam.text, 'i')
+                }, {
+                    rate_percentage: new RegExp(requestParam.text, 'i')
                 }, {
                     status: new RegExp(requestParam.text, 'i')
                 }];
@@ -54,37 +58,19 @@ const getSort = async(requestParam) => {
             let skip = page * sizePerPage;
             let obj = {};
 
-            let joinArr = [{
-                $lookup: {
-                    from: 'products',
-                    localField: 'product_id',
-                    foreignField: 'product_id',
-                    as: 'productDetails',
-                },
-            }, {
-                $unwind: "$productDetails"
-            }, { 
+            let joinArr = [{ 
                 $match : columnAndValue
             }, { 
                 $sort : {created_at:-1}
             }, {
                 $project: {
                     _id: 0,
-                    head_quarter_id: "$head_quarter_id"
+                    product_id: "$product_id"
                 }
             }];
-            let count = await query.joinWithAnd(dbConstants.dbSchema.head_quarters, joinArr);
+            let count = await query.joinWithAnd(dbConstants.dbSchema.products, joinArr);
 
-            joinArr = [{
-                $lookup: {
-                    from: 'products',
-                    localField: 'product_id',
-                    foreignField: 'product_id',
-                    as: 'productDetails',
-                },
-            }, {
-                $unwind: "$productDetails"
-            }, { 
+            joinArr = [{ 
                 $match : columnAndValue
             }, { 
                 $sort : {created_at:-1}
@@ -95,13 +81,9 @@ const getSort = async(requestParam) => {
             }, {
                 $project: {
                     _id: 0,
-                    head_quarter_id: "$head_quarter_id",
-                    name: "$name",
-                    status: "$status",
-                    product: "$productDetails.name",
                 }
             }];
-            let data = await query.joinWithAnd(dbConstants.dbSchema.head_quarters, joinArr);
+            let data = await query.joinWithAnd(dbConstants.dbSchema.products, joinArr);
             data = JSON.parse(JSON.stringify(data))
             obj.data = data;
             obj.count = count.length;
@@ -118,12 +100,12 @@ const getSort = async(requestParam) => {
 const create = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.head_quarters, {name: requestParam.name}, { _id: 0, head_quarter_id:1}, { created_at: 1 });
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.products, {name: requestParam.name}, { _id: 0, product_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_RECORD_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            await query.insertSingle(dbConstants.dbSchema.head_quarters, requestParam);
+            await query.insertSingle(dbConstants.dbSchema.products, requestParam);
             resolve({});
             return;
         } catch (error) {
@@ -138,15 +120,15 @@ const update = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let compareColumnAndValues = {
-                head_quarter_id: { $ne: requestParam.head_quarter_id },
+                product_id: { $ne: requestParam.product_id },
                 name: requestParam.name, 
             };
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.head_quarters, compareColumnAndValues, { _id: 0, head_quarter_id:1}, { created_at: 1 });
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.products, compareColumnAndValues, { _id: 0, product_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_RECORD_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            await query.updateSingle(dbConstants.dbSchema.head_quarters, requestParam, {head_quarter_id: requestParam.head_quarter_id});
+            await query.updateSingle(dbConstants.dbSchema.products, requestParam, {product_id: requestParam.product_id});
             resolve({});
             return;
         } catch (error) {
@@ -160,10 +142,10 @@ const action = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             if (requestParam['type']== "delete") {
-                await query.removeMultiple(dbConstants.dbSchema.head_quarters, { head_quarter_id: { $in: requestParam['ids']}});
+                await query.removeMultiple(dbConstants.dbSchema.products, { product_id: { $in: requestParam['ids']}});
             }
             else{
-                await query.updateMultiple(dbConstants.dbSchema.head_quarters, {status: requestParam.type}, {head_quarter_id: { $in: requestParam['ids']}});
+                await query.updateMultiple(dbConstants.dbSchema.products, {status: requestParam.type}, {product_id: { $in: requestParam['ids']}});
             }
             resolve({});
             return;

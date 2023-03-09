@@ -4,16 +4,20 @@ var Schema = mongoose.Schema;
 const idGenerator = require('./../utils/id-generator');
 
 // create a schema
-var headQuarterSchema = new Schema({
-    head_quarter_id: {
-        type: String,
-        default:''
-    },
+var productSchema = new Schema({
     product_id: {
         type: String,
         default:''
     },
     name: {
+        type: String,
+        default:''
+    },
+    description: {
+        type: String,
+        default:''
+    },
+    rate_percentage: {
         type: String,
         default:''
     },
@@ -32,9 +36,9 @@ var headQuarterSchema = new Schema({
 });
 
 // // Execute before each user.save() call
-headQuarterSchema.pre('save', async function(callback) {
-    this.head_quarter_id = await idGenerator.generateId('HDQ'); 
+productSchema.pre('save', async function(callback) {
+    this.product_id = await idGenerator.generateId('PRO'); 
 });
 
-var Head_quarter = mongoose.model('Head_quarter', headQuarterSchema);
-module.exports = Head_quarter;
+var Product = mongoose.model('Product', productSchema);
+module.exports = Product;
