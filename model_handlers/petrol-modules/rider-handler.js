@@ -108,6 +108,7 @@ const getSort = async(requestParam, req) => {
                     account_number: "$account_number",
                     pin: "$pin",
                     vehicle_id: "$vehicle_id",
+                    followup_date: "$followup_date",
                     // qrcode: "$qrcode",
                     // qrcode_pdf: "$qrcode_pdf",
                 }
@@ -149,6 +150,9 @@ const create = async(requestParam, req) => {
                 if(req.files.driving_license){
                     requestParam.driving_license = await imgHandler.uploadImage(req.files.driving_license, config.aws.s3.riderBucket)
                 }
+            }
+            if(requestParam.followup_date){
+                requestParam.followup_date = timeZone(new Date(requestParam.followup_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
             }
             requestParam.account_number = await generateAccountNumber();
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
@@ -261,10 +265,14 @@ const update = async(requestParam, req) => {
             if(!rider.account_number || rider.account_number == 0){
                 requestParam.account_number = await generateAccountNumber();
             }
+            if(requestParam.followup_date){
+                requestParam.followup_date = timeZone(new Date(requestParam.followup_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+            }
             await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: requestParam.rider_id});
             resolve({});
             return;
         } catch (error) {
+            console.log(error)
             reject(error)
             return
         }
@@ -457,6 +465,7 @@ const getStatement = async(requestParam, req) => {
                     type: 1,
                     amount: 1,
                     created_at: 1,
+                    percentage: 1,
                     branch: "$branchDetails",
                 }
             }];
@@ -472,12 +481,34 @@ const getStatement = async(requestParam, req) => {
                 elem.amount = elem.amount+' TZS'
                 elem.type = LD.upperFirst(elem.type)
                 elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+                if(!elem.percentage){
+                    elem.percentage = ''
+                }
             }))
             obj.data = data;
             obj.count = count.length;
 
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, name:1, total_balance:1, used_balance:1}, { created_at: 1 });
-            obj.rider_info = response ? response : {}
+            if(requestParam.from && requestParam.from == 'new'){
+                let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0} );
+                let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, {rider_id: requestParam.rider_id, type:'deduct', is_settlement:false}, { _id: 0}, { created_at: -1 });
+                let admin_cost = 0
+                let rider_pay_cost = 0
+                await Promise.all(activities.map(async (elem) => {
+                    admin_cost += parseFloat(elem.admin_cost)
+                }));
+
+                let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, name:1, total_balance:1, used_balance:1}, { created_at: -1 });
+                if(response){
+                    response = JSON.parse(JSON.stringify(response))
+                    response.admin_cost = parseFloat(parseFloat(admin_cost).toFixed(2))
+                    response.rider_pay_cost = parseFloat(parseFloat(response.used_balance) + response.admin_cost).toFixed(2)
+                }
+                obj.rider_info = response ? response : {}
+            }
+            else{
+                let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, name:1, total_balance:1, used_balance:1}, { created_at: -1 });
+                obj.rider_info = response ? response : {}
+            }
 
             resolve(obj);
             return;
@@ -494,6 +525,7 @@ const settlement = async(requestParam,)=> {
         try {
             if(parseFloat(requestParam.total_amount_to_pay) == parseFloat(requestParam.amount)){
                 await query.updateSingle(dbConstants.dbSchema.riders, {used_balance: 0}, {rider_id: requestParam.rider_id});
+                await query.updateMultiple(dbConstants.dbSchema.rider_activities, {is_settlement: true}, {rider_id: { $in: requestParam['rider_id']}});
             }
             else{
                 await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
@@ -503,6 +535,174 @@ const settlement = async(requestParam,)=> {
             requestParam.by_whom_id = requestParam.rider_id
             await query.insertSingle(dbConstants.dbSchema.rider_activities, requestParam);
             resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const getReport = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {}
+            if(requestParam.region_id && requestParam.region_id != ''){
+                columnAndValue.region_id = requestParam.region_id
+            }
+            if(requestParam.kijiwe_id && requestParam.kijiwe_id != ''){
+                columnAndValue.kijiwe_id = requestParam.kijiwe_id
+            }
+            if(requestParam.vehicle_id && requestParam.vehicle_id != ''){
+                columnAndValue.vehicle_id = requestParam.vehicle_id
+            }
+            if(requestParam.text && requestParam.text !=''){
+                columnAndValue['$or'] = [{
+                    rider_id: new RegExp(requestParam.text, 'i')
+                }, {
+                    name: new RegExp(requestParam.text, 'i')
+                }];
+            }
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id: "$rider_id"
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
+
+            joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id:1,
+                    name:1,
+                    region_id:1,
+                    vehicle_id:1,
+                    kijiwe_id:1,
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            await Promise.all(data.map(async (elem) => {
+                let region = await query.selectWithAndOne(dbConstants.dbSchema.regions, {region_id: elem.region_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.region = region ? region.name : ''
+
+                let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.panda_vehicles, {vehicle_id: elem.vehicle_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.vehicle = vehicle ? vehicle.name : ''
+
+                let kijiwe = await query.selectWithAndOne(dbConstants.dbSchema.kijiwes, {kijiwe_id: elem.kijiwe_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.kijiwe = kijiwe ? kijiwe.name : ''
+
+                let obj = {rider_id: elem.rider_id, type:'deduct', is_settlement:false}
+                if(requestParam.start_date && requestParam.end_date){
+                    let start_date = timeZone(new Date(requestParam.start_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                    let end_date = timeZone(new Date(requestParam.end_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                    obj.created_at = {
+                        $lte: new Date(end_date+'T23:59:59.000Z'),
+                        $gte: new Date(start_date+'T00:00:00.000Z')
+                    }
+                }
+                let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
+                let admin_cost = 0
+                let used_amount = 0
+                await Promise.all(activities.map(async (elem) => {
+                    admin_cost += parseFloat(elem.admin_cost)
+                    used_amount += parseFloat(elem.amount)
+                }));
+
+                elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+            }))
+            obj.data = data;
+            obj.count = count.length;
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const getReportXlsx = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {}
+            if(requestParam.region_id && requestParam.region_id != ''){
+                columnAndValue.region_id = requestParam.region_id
+            }
+            if(requestParam.kijiwe_id && requestParam.kijiwe_id != ''){
+                columnAndValue.kijiwe_id = requestParam.kijiwe_id
+            }
+            if(requestParam.vehicle_id && requestParam.vehicle_id != ''){
+                columnAndValue.vehicle_id = requestParam.vehicle_id
+            }
+            let joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    rider_id:1,
+                    name:1,
+                    region_id:1,
+                    vehicle_id:1,
+                    kijiwe_id:1,
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            await Promise.all(data.map(async (elem) => {
+                let region = await query.selectWithAndOne(dbConstants.dbSchema.regions, {region_id: elem.region_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.region = region ? region.name : ''
+
+                let vehicle = await query.selectWithAndOne(dbConstants.dbSchema.panda_vehicles, {vehicle_id: elem.vehicle_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.vehicle = vehicle ? vehicle.name : ''
+
+                let kijiwe = await query.selectWithAndOne(dbConstants.dbSchema.kijiwes, {kijiwe_id: elem.kijiwe_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.kijiwe = kijiwe ? kijiwe.name : ''
+
+                let obj = {rider_id: elem.rider_id, type:'deduct', is_settlement:false}
+                if(requestParam.start_date && requestParam.end_date){
+                    let start_date = timeZone(new Date(requestParam.start_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                    let end_date = timeZone(new Date(requestParam.end_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                    obj.created_at = {
+                        $lte: new Date(end_date+'T23:59:59.000Z'),
+                        $gte: new Date(start_date+'T00:00:00.000Z')
+                    }
+                }
+                let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
+                let admin_cost = 0
+                let used_amount = 0
+                await Promise.all(activities.map(async (elem) => {
+                    admin_cost += parseFloat(elem.admin_cost)
+                    used_amount += parseFloat(elem.amount)
+                }));
+
+                elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+            }))
+            resolve(data);
             return;
         } catch (error) {
             console.log(error)
@@ -522,5 +722,7 @@ module.exports = {
     updateBalance,
     getStatement,
     settlement,
-    generateAccountNumber
+    generateAccountNumber,
+    getReport,
+    getReportXlsx
 };

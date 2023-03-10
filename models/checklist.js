@@ -4,8 +4,8 @@ var Schema = mongoose.Schema;
 const idGenerator = require('./../utils/id-generator');
 
 // create a schema
-var pandaVehicleSchema = new Schema({
-    vehicle_id: {
+var checklistSchema = new Schema({
+    checklist_id: {
         type: String,
         default:''
     },
@@ -13,9 +13,13 @@ var pandaVehicleSchema = new Schema({
         type: String,
         default:''
     },
-    deadline_days: {
-        type: Number,
-        default:0
+    description: {
+        type: String,
+        default:''
+    },
+    percentage: {
+        type: String,
+        default:''
     },
     status: {
         type: String,
@@ -32,9 +36,9 @@ var pandaVehicleSchema = new Schema({
 });
 
 // // Execute before each user.save() call
-pandaVehicleSchema.pre('save', async function(callback) {
-    this.vehicle_id = await idGenerator.generateId('VEH'); 
+checklistSchema.pre('save', async function(callback) {
+    this.checklist_id = await idGenerator.generateId('CKL'); 
 });
 
-var Panda_vehicle = mongoose.model('Panda_vehicle', pandaVehicleSchema);
-module.exports = Panda_vehicle;
+var Checklist = mongoose.model('Checklist', checklistSchema);
+module.exports = Checklist;

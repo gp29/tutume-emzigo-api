@@ -37,6 +37,18 @@ var branchActivitySchema = new Schema({
         type: String,
         default:''
     },
+    product_id: {
+        type: String,
+        default:''
+    },
+    percentage: {
+        type: Number,
+        default: 0
+    },
+    admin_cost: {
+        type: Number,
+        default: 0
+    },
     created_at: {
         type: Date,
         default: Date.now

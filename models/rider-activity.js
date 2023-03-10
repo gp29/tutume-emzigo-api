@@ -37,6 +37,22 @@ var riderActivitySchema = new Schema({
         type: String,
         default:''
     },
+    product_id: {
+        type: String,
+        default:''
+    },
+    percentage: {
+        type: Number,
+        default: 0
+    },
+    admin_cost: {
+        type: Number,
+        default: 0
+    },
+    is_settlement: {
+        type: Boolean,
+        default: false
+    },
     created_at: {
         type: Date,
         default: Date.now

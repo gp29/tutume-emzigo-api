@@ -30,5 +30,6 @@ module.exports = {
         companies: 'Company',
         panda_vehicles: 'Panda_vehicle',
         products: 'Product',
+        checklists: 'Checklist',
     }
 };

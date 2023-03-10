@@ -490,7 +490,8 @@ const verifyPin = async(requestParam) => {
 const submitAmount = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1} );
+            let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0} );
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1, head_quarter_id:1} );
             if(!response){
                 reject(errors(labels.LBL_REG_ID_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
@@ -498,6 +499,16 @@ const submitAmount = async(requestParam) => {
             let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, total_balance:1} );
             if(!rider){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.Conflict));
+                return;
+            }
+            let serviceProvider = await query.selectWithAndOne(dbConstants.dbSchema.head_quarters, {head_quarter_id:response.head_quarter_id}, { _id:0, head_quarter_id:1, product_id:1} );
+            if(!serviceProvider){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id:serviceProvider.product_id}, { _id:0, product_id:1, rate_percentage:1} );
+            if(!product){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
             if(parseFloat(requestParam.amount) > parseFloat(rider.total_balance)){
@@ -511,12 +522,17 @@ const submitAmount = async(requestParam) => {
             await query.updateSingle(dbConstants.dbSchema.branches, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {branch_id: requestParam.branch_id});
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
+            
+            let percentage = product ? parseFloat(product.rate_percentage) : parseFloat(settings.rider_interest_percentage);
             let obj = {
                 branch_id: requestParam.branch_id,
                 rider_id: requestParam.rider_id,
                 type:'deduct',
                 amount: requestParam.amount,
-                by_whom:'You'
+                by_whom:'You',
+                product_id: product ? product.product_id : '',
+                percentage: percentage,
+                admin_cost: parseFloat(parseFloat((parseFloat(requestParam.amount) * percentage) / 100).toFixed(2)),
             }
             await query.insertSingle(dbConstants.dbSchema.branch_activities, obj);
             await query.insertSingle(dbConstants.dbSchema.rider_activities, obj);

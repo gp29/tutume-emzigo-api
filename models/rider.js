@@ -81,6 +81,14 @@ var riderSchema = new Schema({
         type: Number,
         default:0
     },
+    checklist_id: {
+        type: Array,
+        default:[]
+    },
+    followup_date: {
+        type: String,
+        default:''
+    },
     created_at: {
         type: Date,
         default: Date.now

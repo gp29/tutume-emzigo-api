@@ -95,6 +95,7 @@ app.use('/api/rider', require('./routes/petrol-modules/rider'));
 app.use('/api/kijiwe', require('./routes/petrol-modules/kijiwe'));
 app.use('/api/panda-vehicle', require('./routes/petrol-modules/vehicle'));
 app.use('/api/product', require('./routes/petrol-modules/product'));
+app.use('/api/checklist', require('./routes/petrol-modules/checklist'));
 
 app.use(upload());
 

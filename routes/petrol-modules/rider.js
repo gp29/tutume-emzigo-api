@@ -89,4 +89,22 @@ router.post('/settlement', async(req, res) => {
     }
 });
 
+router.post('/get-report', async(req, res) => {
+    try {
+        let response = await riderHandler.getReport(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/get-report-xlsx', async(req, res) => {
+    try {
+        let response = await riderHandler.getReportXlsx(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;
