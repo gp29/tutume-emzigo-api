@@ -111,6 +111,15 @@ router.post('/get-report-xlsx', async(req, res) => {
     }
 });
 
+router.post('/change-password', async(req, res) => {
+    try {
+        let response = await riderHandler.changePassword(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 // APIs
 router.post('/signin', async(req, res) => {
     try {

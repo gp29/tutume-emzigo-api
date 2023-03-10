@@ -176,6 +176,7 @@ const create = async(requestParam, req) => {
             })
             requestParam.checklist_percentage = checklist_percentage
             requestParam.account_number = await generateAccountNumber();
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString());
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
             resolve({});
             return;
@@ -739,6 +740,20 @@ const getReportXlsx = async(requestParam) => {
     })
 };
 
+const changePassword = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let password = await passwordHandler.encrypt(requestParam.password.toString());
+            await query.updateSingle(dbConstants.dbSchema.riders, {password}, {rider_id: requestParam.rider_id});
+            resolve({});
+            return;
+        } catch (error) {
+            reject(error)
+            return
+        }
+    })
+};
+
 // APIs
 
 const signin = async(requestParam, req) => {
@@ -845,6 +860,7 @@ module.exports = {
     generateAccountNumber,
     getReport,
     getReportXlsx,
+    changePassword,
     //APIs
     signin,
     profile,
