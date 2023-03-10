@@ -89,6 +89,10 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    checklist_percentage: {
+        type: Number,
+        default:0
+    },
     created_at: {
         type: Date,
         default: Date.now

@@ -1892,6 +1892,122 @@
                 },
                 "operationId": "PetrolController.VerifyPin"
             }
+        },
+        "/rider/signin": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "RiderSignin",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "RiderSignin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.RiderSignin"
+            }
+        },
+        "/rider/profile": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "GetRiderProfile",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetRiderProfile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "rider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.GetRiderProfile"
+            }
+        },
+        "/rider/transaction-history": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "TransactionHistory",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "TransactionHistory",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "rider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "page",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }, {
+                    "name": "date",
+                    "description": "Optional => Pass while filter => format YYYY-MM-DD",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.TransactionHistory"
+            }
         }
     },
     "components": {},

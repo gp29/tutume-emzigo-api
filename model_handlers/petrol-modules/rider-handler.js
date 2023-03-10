@@ -14,6 +14,8 @@ const timeZone = require('moment-timezone');
 const fs = require('fs');
 const imgHandler = require('./../../model_handlers/image-handler');
 const idGenerator = require('./../../utils/id-generator');
+const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-handler');
+const passwordHandler = require('./../../utils/password-handler');
 const QRCode = require('qrcode');
 const LD = require('lodash');
 const AWS = require('aws-sdk');
@@ -61,6 +63,17 @@ const getSort = async(requestParam, req) => {
         try {
             let fullUrl = req.protocol + '://' + req.get('host');
             let columnAndValue = {}
+            if(requestParam.checklist_percentage && requestParam.checklist_percentage != ''){
+                columnAndValue.checklist_percentage = {$eq: parseFloat(requestParam.checklist_percentage)}
+            }
+            if(requestParam.start_date && requestParam.end_date != ''){
+                let start_date = timeZone(new Date(requestParam.start_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                let end_date = timeZone(new Date(requestParam.end_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
+                for(var arr=[],dt=new Date(start_date); dt<=new Date(end_date); dt.setDate(dt.getDate()+1)){
+                    arr.push(moment(new Date(dt)).format('YYYY-MM-DD'));
+                }
+                columnAndValue.followup_date = {$in:arr}
+            }
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
                     rider_id: new RegExp(requestParam.text, 'i')
@@ -109,6 +122,7 @@ const getSort = async(requestParam, req) => {
                     pin: "$pin",
                     vehicle_id: "$vehicle_id",
                     followup_date: "$followup_date",
+                    checklist_percentage: "$checklist_percentage",
                     // qrcode: "$qrcode",
                     // qrcode_pdf: "$qrcode_pdf",
                 }
@@ -116,6 +130,7 @@ const getSort = async(requestParam, req) => {
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
             await Promise.all(data.map(async (elem) => {
+                elem.checklist_percentage = elem.checklist_percentage+'%'
                 elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
                 // elem.qrcode = elem.qrcode != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode : ''
                 // //elem.qrcode_pdf = elem.qrcode_pdf != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode_pdf : ''
@@ -154,6 +169,12 @@ const create = async(requestParam, req) => {
             if(requestParam.followup_date){
                 requestParam.followup_date = timeZone(new Date(requestParam.followup_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
             }
+            let checklists = await query.selectWithAnd(dbConstants.dbSchema.checklists, {checklist_id:{$in: requestParam.checklist_id}}, { _id: 0, checklist_id:1, percentage:1}, { created_at: 1 });
+            let checklist_percentage = 0
+            _.each(checklists, (elem) => {
+                checklist_percentage += parseFloat(elem.percentage)
+            })
+            requestParam.checklist_percentage = checklist_percentage
             requestParam.account_number = await generateAccountNumber();
             let res = await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
             resolve({});
@@ -268,6 +289,12 @@ const update = async(requestParam, req) => {
             if(requestParam.followup_date){
                 requestParam.followup_date = timeZone(new Date(requestParam.followup_date)).tz(requestParam.time_zone).format('YYYY-MM-DD')
             }
+            let checklists = await query.selectWithAnd(dbConstants.dbSchema.checklists, {checklist_id:{$in: requestParam.checklist_id}}, { _id: 0, checklist_id:1, percentage:1}, { created_at: 1 });
+            let checklist_percentage = 0
+            _.each(checklists, (elem) => {
+                checklist_percentage += parseFloat(elem.percentage)
+            })
+            requestParam.checklist_percentage = checklist_percentage
             await query.updateSingle(dbConstants.dbSchema.riders, requestParam, {rider_id: requestParam.rider_id});
             resolve({});
             return;
@@ -712,6 +739,98 @@ const getReportXlsx = async(requestParam) => {
     })
 };
 
+// APIs
+
+const signin = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile:requestParam.mobile}, { _id:0, rider_id:1, name:1, mobile:1, status:1, password:1} );
+            if(!response){
+                reject(errors(labels.LBL_MOBILE_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            let encryptPassword = await passwordHandler.encrypt(requestParam.password.toString());
+            if(encryptPassword != response.password){
+                reject(errors(labels.LBL_INVALID_PWD[config.default_language], responseCodes.InvalidOTP));
+                return;
+            }
+            resolve(profile({rider_id: response.rider_id, time_zone: requestParam.time_zone}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const profile = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, name:1, mobile:1, status:1, total_balance:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            if(response.status == 'inactive'){
+                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            response.my_balance = parseFloat(response.total_balance).toFixed(2)+' TZS'
+            let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, {rider_id: requestParam.rider_id, type:'deduct', is_settlement:false}, { _id: 0}, { created_at: -1 });
+            let admin_cost = 0
+            await Promise.all(activities.map(async (elem) => {
+                admin_cost += parseFloat(elem.admin_cost)
+            }));
+            response.pending_balance = parseFloat(admin_cost).toFixed(2)+' TZS'
+            delete response.total_balance
+            resolve(await encryptDecryptHandler.encrypt(response));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const transactionHistory = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let page = (requestParam.page ? requestParam.page : 1);
+            let limit = 10;
+            page -= 1;
+            let skip = page * limit;
+
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let matchColumn = {rider_id: requestParam.rider_id}
+            if(requestParam.date && requestParam.date != ''){
+                matchColumn.created_at = {
+                    $lte: new Date(requestParam.date+'T23:59:59.000Z'),
+                    $gte: new Date(requestParam.date+'T00:00:00.000Z')
+                }
+            }
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.rider_activities, matchColumn, { _id:0, activity_id: 1, rider_id:1, amount:1, type:1, created_at:1}, { created_at: -1 }, { skip, limit });
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -724,5 +843,9 @@ module.exports = {
     settlement,
     generateAccountNumber,
     getReport,
-    getReportXlsx
+    getReportXlsx,
+    //APIs
+    signin,
+    profile,
+    transactionHistory
 };

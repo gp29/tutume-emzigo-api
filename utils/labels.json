@@ -62,6 +62,9 @@
     "LBL_REG_ID_FOUND": {
         "EN": "Registration ID not exists in our system."
     },
+    "LBL_MOBILE_FOUND": {
+        "EN": "Mobile not exists in our system."
+    },
     "LBL_INVALID_QR_CODE_VALUE": {
         "EN": "Invalid QR code value."
     },
