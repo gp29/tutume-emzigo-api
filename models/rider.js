@@ -21,6 +21,10 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    password: {
+        type: String,
+        default:''
+    },
     address: {
         type: String,
         default:''
