@@ -130,7 +130,7 @@ const getSort = async(requestParam, req) => {
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
             await Promise.all(data.map(async (elem) => {
-                elem.checklist_percentage = elem.checklist_percentage+'%'
+                elem.checklist_percentage = elem.checklist_percentage ? elem.checklist_percentage+'%' : ''
                 elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
                 // elem.qrcode = elem.qrcode != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode : ''
                 // //elem.qrcode_pdf = elem.qrcode_pdf != '' ? config.aws.prefix + config.aws.s3.qrcodeBucket + '/' + elem.qrcode_pdf : ''
