@@ -731,6 +731,7 @@ const getReportXlsx = async(requestParam) => {
                         $gte: parseFloat(requestParam.from)
                     }
                 }
+                console.log(obj)
                 let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
                 let admin_cost = 0
                 let used_amount = 0
