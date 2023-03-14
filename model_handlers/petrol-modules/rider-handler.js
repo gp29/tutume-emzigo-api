@@ -648,6 +648,12 @@ const getReport = async(requestParam) => {
                         $gte: new Date(start_date+'T00:00:00.000Z')
                     }
                 }
+                if(requestParam.from && requestParam.to){
+                    obj.admin_cost = {
+                        $lte: parseFloat(requestParam.to),
+                        $gte: parseFloat(requestParam.from)
+                    }
+                }
                 let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
                 let admin_cost = 0
                 let used_amount = 0
@@ -717,6 +723,12 @@ const getReportXlsx = async(requestParam) => {
                     obj.created_at = {
                         $lte: new Date(end_date+'T23:59:59.000Z'),
                         $gte: new Date(start_date+'T00:00:00.000Z')
+                    }
+                }
+                if(requestParam.from && requestParam.to){
+                    obj.admin_cost = {
+                        $lte: parseFloat(requestParam.to),
+                        $gte: parseFloat(requestParam.from)
                     }
                 }
                 let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
