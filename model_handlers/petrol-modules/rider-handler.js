@@ -737,8 +737,8 @@ const getReportXlsx = async(requestParam) => {
                     admin_cost += parseFloat(elem.admin_cost)
                     used_amount += parseFloat(elem.amount)
                 }));
-                if(requestParam.from && requestParam.to){
-                    if(admin_cost <= requestParam.to && admin_cost >= requestParam.from){
+                if(requestParam.from && requestParam.from !='' && requestParam.to && requestParam.to !=''){
+                    if(admin_cost <= parseFloat(requestParam.to) && admin_cost >= parseFloat(requestParam.from)){
                         elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
                         elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
                         arr.push(elem)
