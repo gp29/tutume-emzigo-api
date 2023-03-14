@@ -629,6 +629,7 @@ const getReport = async(requestParam) => {
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
+            let arr = []
             await Promise.all(data.map(async (elem) => {
                 let region = await query.selectWithAndOne(dbConstants.dbSchema.regions, {region_id: elem.region_id}, { _id: 0, name:1}, { created_at: 1 });
                 elem.region = region ? region.name : ''
@@ -648,12 +649,6 @@ const getReport = async(requestParam) => {
                         $gte: new Date(start_date+'T00:00:00.000Z')
                     }
                 }
-                if(requestParam.from && requestParam.to){
-                    obj.admin_cost = {
-                        $lte: parseFloat(requestParam.to),
-                        $gte: parseFloat(requestParam.from)
-                    }
-                }
                 let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
                 let admin_cost = 0
                 let used_amount = 0
@@ -661,11 +656,20 @@ const getReport = async(requestParam) => {
                     admin_cost += parseFloat(elem.admin_cost)
                     used_amount += parseFloat(elem.amount)
                 }));
-
-                elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
-                elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                if(requestParam.from && requestParam.to){
+                    if(admin_cost <= requestParam.to && admin_cost >= requestParam.from){
+                        elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                        elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                        arr.push(elem)
+                    }
+                }
+                else{
+                    elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                    elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                    arr.push(elem)
+                }
             }))
-            obj.data = data;
+            obj.data = arr;
             obj.count = count.length;
             resolve(obj);
             return;
@@ -706,6 +710,7 @@ const getReportXlsx = async(requestParam) => {
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.riders, joinArr);
             data = JSON.parse(JSON.stringify(data))
+            let arr = []
             await Promise.all(data.map(async (elem) => {
                 let region = await query.selectWithAndOne(dbConstants.dbSchema.regions, {region_id: elem.region_id}, { _id: 0, name:1}, { created_at: 1 });
                 elem.region = region ? region.name : ''
@@ -725,13 +730,6 @@ const getReportXlsx = async(requestParam) => {
                         $gte: new Date(start_date+'T00:00:00.000Z')
                     }
                 }
-                if(requestParam.from && requestParam.to){
-                    obj.admin_cost = {
-                        $lte: parseFloat(requestParam.to),
-                        $gte: parseFloat(requestParam.from)
-                    }
-                }
-                console.log(obj)
                 let activities = await query.selectWithAnd(dbConstants.dbSchema.rider_activities, obj, { _id: 0}, { created_at: -1 });
                 let admin_cost = 0
                 let used_amount = 0
@@ -739,11 +737,20 @@ const getReportXlsx = async(requestParam) => {
                     admin_cost += parseFloat(elem.admin_cost)
                     used_amount += parseFloat(elem.amount)
                 }));
-
-                elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
-                elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                if(requestParam.from && requestParam.to){
+                    if(admin_cost <= requestParam.to && admin_cost >= requestParam.from){
+                        elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                        elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                        arr.push(elem)
+                    }
+                }
+                else{
+                    elem.used_amount = parseFloat(used_amount).toFixed(2)+' TZS'
+                    elem.admin_cost = parseFloat(admin_cost).toFixed(2)+' TZS'
+                    arr.push(elem)
+                }
             }))
-            resolve(data);
+            resolve(arr);
             return;
         } catch (error) {
             console.log(error)
