@@ -837,7 +837,7 @@ const transactionHistory = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let page = (requestParam.page ? requestParam.page : 1);
-            let limit = 10;
+            let limit = 15;
             page -= 1;
             let skip = page * limit;
 
