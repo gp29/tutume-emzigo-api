@@ -1,73 +1,85 @@
 'use strict';
 
-const awsHandler = require('./aws-handler');
+const config = require('../config');
 const fs = require('fs');
+const { PutObjectCommand, S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+
+const s3Client = new S3Client({
+    endpoint: config.aws.endpoint,
+    forcePathStyle:false,
+    region: config.aws.region,
+    credentials: {
+        accessKeyId: config.aws.keyId,
+        secretAccessKey: config.aws.key
+    }
+});
 
 class S3Handler {
-    constructor() {
-        this._objectsToUpload = null;
-        this._s3 = awsHandler.s3();
-    };
 
     imageUpload(requestParam) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const file_data = fs.readFileSync(requestParam.path);
             if(requestParam.contentType == 'mp4'){
                 requestParam.contentType = 'video/mp4'
             }
-            //const params = {Bucket: requestParam.bucket, Key: requestParam.file_name, Body: file_data, ContentType : requestParam.contentType};
-            const params = {Bucket: requestParam.bucket, Key: requestParam.file_name, Body: file_data, ContentType : requestParam.contentType, ACL : 'public-read'};
-            this._s3.upload(params, (err, data)=> {
-                if (err) {
-                    reject(err);
-                    return;
-                }
+            if(requestParam.contentType == 'mp3'){
+                requestParam.contentType = 'audio/mp3'
+            }
+            if(requestParam.contentType == 'MOV'){
+                requestParam.contentType = 'video/MOV'
+            }
+
+            const params = {Bucket: config.aws.bucketName, Key: requestParam.bucket+'/'+requestParam.file_name, Body: file_data, ContentType : requestParam.contentType, ACL : 'public-read'};
+            try {
+                const data = await s3Client.send(new PutObjectCommand(params));
                 resolve(data);
+                return;
+            } catch (e) {
+                console.log(e);
+                reject(e);
                 return
-            });
+            }
         })
     };
 
-    writeFile(file_data,fileName, bucket, contentType, done) {
-        const params = {Bucket: bucket, Key: fileName, Body: file_data, ContentType : contentType, ACL : 'public-read'};
-        this._s3.upload(params, function(err, data) {
-            done(err, data);
-        });
-    };
-
     pdfUpload(requestParam) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const file_data = fs.readFileSync(requestParam.path);
-            const params = {Bucket: requestParam.bucket, Key: requestParam.file_name, Body: file_data, ContentType : requestParam.contentType, ACL : 'public-read'};
-            this._s3.upload(params, (err, data)=> {
-                if (err) {
-                    reject(err);
-                    return;
-                }
+            const params = {Bucket: config.aws.bucketName, Key: requestParam.bucket+'/'+requestParam.file_name, Body: file_data, ContentType : requestParam.contentType, ACL : 'public-read'};
+            try {
+                const data = await s3Client.send(new PutObjectCommand(params));
                 resolve(data);
+                return;
+            } catch (e) {
+                console.log(e);
+                reject(e);
                 return
-            });
+            }
         })
     };
 
     imageDelete(requestParam) {
-        return new Promise((resolve, reject) => {
-            const params = {
-                Bucket: requestParam.bucket,
-                Delete: {
-                    Objects:requestParam.objects,
-                    Quiet: false
-                }
-            };
-            this._s3.deleteObjects(params, (error, data) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                resolve(data);
-                return
-            });
+        return new Promise(async (resolve, reject) => {
+            await Promise.all(requestParam.objects.map(async (elem) => {
+                const bucketParams = { Bucket: requestParam.bucket, Key: elem.Key };
+                await s3Client.send(new DeleteObjectCommand(bucketParams));
+            }))
+            resolve({});
+            return
         })
+    };
+
+    async writeFile(file_data,fileName, bucket, contentType, done) {
+        const params = {Bucket: config.aws.bucketName, Key: bucket+'/'+fileName, Body: file_data, ContentType : contentType, ACL : 'public-read'};
+        try {
+            const data = await s3Client.send(new PutObjectCommand(params));
+            resolve(data);
+            return;
+        } catch (e) {
+            console.log(e);
+            reject(e);
+            return
+        }
     };
 
     imageGet(requestParam) {

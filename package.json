@@ -8,6 +8,7 @@
 		"start": "node bin/index.js"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.296.0",
 		"async": "^3.2.0",
 		"aws-sdk": "^2.1034.0",
 		"blob-stream": "^0.1.3",

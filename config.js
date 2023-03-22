@@ -10,6 +10,7 @@ const requiredParams = [
     'AWS_ACCESS_KEY_ID',
     'AWS_ACCESS_SECRET_KEY',
     'AWS_REGION',
+    'AWS_END_POINT',
     'AWS_S3_BUCKET_NAME',
     'AWS_S3_URL_PRIFIX',
     'AWS_S3_CUSTOMER_BUCKET',
@@ -55,6 +56,7 @@ module.exports = {
         key: process.env.AWS_ACCESS_SECRET_KEY,
         region: process.env.AWS_REGION,
         bucketName: process.env.AWS_S3_BUCKET_NAME,
+        endpoint: process.env.AWS_END_POINT,
         prefix: process.env.AWS_S3_URL_PRIFIX,
         s3: {
             customerBucket: process.env.AWS_S3_CUSTOMER_BUCKET,
