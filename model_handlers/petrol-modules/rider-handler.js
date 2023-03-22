@@ -822,6 +822,7 @@ const profile = async(requestParam) => {
             response.pending_balance = parseFloat(admin_cost).toFixed(2)+' TZS'
             delete response.total_balance
             response.user_type = 'rider'
+            response.user_id = response.rider_id
             resolve(await encryptDecryptHandler.encrypt(response));
             return;
         } catch (error) {

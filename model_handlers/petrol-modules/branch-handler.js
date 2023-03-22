@@ -233,6 +233,7 @@ const profile = async(requestParam) => {
             }
             response = JSON.parse(JSON.stringify(response))
             response.user_type = 'service_provider'
+            response.user_id = response.branch_id
             resolve(await encryptDecryptHandler.encrypt(response));
             return;
         } catch (error) {
