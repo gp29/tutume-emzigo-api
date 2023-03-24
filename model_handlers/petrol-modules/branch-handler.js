@@ -471,10 +471,7 @@ const getRiderDetails = async(requestParam) => {
 const verifyPin = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log("verifyPin")
-            console.log(requestParam.rider_id)
             let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, pin:1} );
-            console.log(rider)
             if(!rider){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
@@ -495,8 +492,6 @@ const verifyPin = async(requestParam) => {
 const submitAmount = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log("submitAmount")
-            console.log(requestParam)
             let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0} );
             let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1, head_quarter_id:1} );
             if(!response){
@@ -514,10 +509,10 @@ const submitAmount = async(requestParam) => {
                 return;
             }
             let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id:serviceProvider.product_id}, { _id:0, product_id:1, rate_percentage:1} );
-            if(!product){
-                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
-                return;
-            }
+            // if(!product){
+            //     reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+            //     return;
+            // }
             if(parseFloat(requestParam.amount) > parseFloat(rider.total_balance)){
                 reject(errors(labels.LBL_AMOUNT_NOT_MORE_THEN_RIDER_BALANCE[config.default_language], responseCodes.NotActive));
                 return;
