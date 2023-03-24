@@ -472,7 +472,9 @@ const verifyPin = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             console.log(requestParam)
+            console.log(requestParam.rider_id)
             let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, pin:1} );
+            console.log(rider)
             if(!rider){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
