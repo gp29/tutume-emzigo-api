@@ -471,7 +471,7 @@ const getRiderDetails = async(requestParam) => {
 const verifyPin = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log(requestParam)
+            console.log("verifyPin")
             console.log(requestParam.rider_id)
             let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, pin:1} );
             console.log(rider)
@@ -495,6 +495,8 @@ const verifyPin = async(requestParam) => {
 const submitAmount = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
+            console.log("submitAmount")
+            console.log(requestParam)
             let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0} );
             let response = await query.selectWithAndOne(dbConstants.dbSchema.branches, {branch_id:requestParam.branch_id}, { _id:0, branch_id:1, total_balance:1, head_quarter_id:1} );
             if(!response){
