@@ -56,14 +56,14 @@ const getSort = async(requestParam) => {
 
             let joinArr = [{
                 $lookup: {
-                    from: 'products',
-                    localField: 'product_id',
-                    foreignField: 'product_id',
-                    as: 'productDetails',
+                    from: 'fuels',
+                    localField: 'fuel_id',
+                    foreignField: 'fuel_id',
+                    as: 'fuelDetails',
                 },
             }, {
                 "$unwind": {
-                    "path": "$productDetails",
+                    "path": "$fuelDetails",
                     "preserveNullAndEmptyArrays": true
                 }
             }, { 
@@ -80,14 +80,14 @@ const getSort = async(requestParam) => {
 
             joinArr = [{
                 $lookup: {
-                    from: 'products',
-                    localField: 'product_id',
-                    foreignField: 'product_id',
-                    as: 'productDetails',
+                    from: 'fuels',
+                    localField: 'fuel_id',
+                    foreignField: 'fuel_id',
+                    as: 'fuelDetails',
                 },
             }, {
                 "$unwind": {
-                    "path": "$productDetails",
+                    "path": "$fuelDetails",
                     "preserveNullAndEmptyArrays": true
                 }
             }, { 
@@ -104,13 +104,13 @@ const getSort = async(requestParam) => {
                     head_quarter_id: "$head_quarter_id",
                     name: "$name",
                     status: "$status",
-                    product: "$productDetails",
+                    fuel: "$fuelDetails",
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.head_quarters, joinArr);
             data = JSON.parse(JSON.stringify(data))
             _.each(data, (elem) => {
-                elem.product = elem.product ? elem.product.name : ''
+                elem.fuel = elem.fuel ? elem.fuel.name : ''
             })
             obj.data = data;
             obj.count = count.length;

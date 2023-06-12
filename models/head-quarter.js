@@ -9,7 +9,7 @@ var headQuarterSchema = new Schema({
         type: String,
         default:''
     },
-    product_id: {
+    fuel_id: {
         type: String,
         default:''
     },

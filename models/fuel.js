@@ -4,8 +4,8 @@ var Schema = mongoose.Schema;
 const idGenerator = require('./../utils/id-generator');
 
 // create a schema
-var productSchema = new Schema({
-    product_id: {
+var fuelSchema = new Schema({
+    fuel_id: {
         type: String,
         default:''
     },
@@ -36,9 +36,9 @@ var productSchema = new Schema({
 });
 
 // // Execute before each user.save() call
-productSchema.pre('save', async function(callback) {
-    this.product_id = await idGenerator.generateId('PRO'); 
+fuelSchema.pre('save', async function(callback) {
+    this.fuel_id = await idGenerator.generateId('FUL'); 
 });
 
-var Product = mongoose.model('Product', productSchema);
-module.exports = Product;
+var Fuel = mongoose.model('Fuel', fuelSchema);
+module.exports = Fuel;

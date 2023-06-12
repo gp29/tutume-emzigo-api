@@ -7,7 +7,7 @@ const router = express.Router();
 const config = require('./../../config');
 const labels = require('./../../utils/labels.json')
 const errors = require('./../../utils/dz-errors');
-const handler = require('./../../model_handlers/petrol-modules/product-handler');
+const handler = require('./../../model_handlers/petrol-modules/fuel-handler');
 
 router.post('/create', async(req, res) => {
     try {

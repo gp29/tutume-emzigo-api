@@ -29,7 +29,7 @@ module.exports = {
         statuses: 'Status',
         companies: 'Company',
         panda_vehicles: 'Panda_vehicle',
-        products: 'Product',
+        fuels: 'Fuel',
         checklists: 'Checklist',
     }
 };

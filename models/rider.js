@@ -97,6 +97,10 @@ var riderSchema = new Schema({
         type: Number,
         default:0
     },
+    fuel_credit_limit: {
+        type: Number,
+        default:0
+    },
     created_at: {
         type: Date,
         default: Date.now

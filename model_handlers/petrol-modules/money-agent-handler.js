@@ -51,6 +51,35 @@ const profile = async(requestParam) => {
             }
             response.user_type = 'money_agent'
             response.user_id = response.user_id
+            response.due_amount = '0 TZS'
+            response.today_earn_amount = '0 TZS'
+            resolve(await encryptDecryptHandler.encrypt(response));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const riderDetails = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            response = JSON.parse(JSON.stringify(response))
+            if(response.status == 'inactive'){
+                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+                return;
+            }
+            response.user_type = 'money_agent'
+            response.user_id = response.user_id
+            response.due_amount = '0 TZS'
+            response.today_earn_amount = '0 TZS'
             resolve(await encryptDecryptHandler.encrypt(response));
             return;
         } catch (error) {
@@ -63,5 +92,6 @@ const profile = async(requestParam) => {
 
 module.exports = {
     signin,
-    profile
+    profile,
+    riderDetails
 };

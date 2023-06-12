@@ -4,7 +4,7 @@ const config = require('./../../config');
 const errors = require('./../../utils/dz-errors');
 const dbConstants = require('./../../constants/db-constants');
 const query = require('./../../utils/query-creator');
-const product = require('./../../models/product');
+const fuel = require('./../../models/fuel');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
@@ -14,14 +14,14 @@ const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let columnValue = {}
-            if(requestParam.product_id){
-                columnValue.product_id = requestParam.product_id
+            if(requestParam.fuel_id){
+                columnValue.fuel_id = requestParam.fuel_id
             }
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
-            let response = await query.selectWithAnd(dbConstants.dbSchema.products, columnValue, { _id: 0}, { created_at: 1 });
-            if(requestParam.product_id){
+            let response = await query.selectWithAnd(dbConstants.dbSchema.fuels, columnValue, { _id: 0}, { created_at: 1 });
+            if(requestParam.fuel_id){
                 response = response[0]
                 resolve(response);
                 return;
@@ -42,7 +42,7 @@ const getSort = async(requestParam) => {
             let columnAndValue = {}
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
-                    product_id: new RegExp(requestParam.text, 'i')
+                    fuel_id: new RegExp(requestParam.text, 'i')
                 }, {
                     name: new RegExp(requestParam.text, 'i')
                 }, {
@@ -65,10 +65,10 @@ const getSort = async(requestParam) => {
             }, {
                 $project: {
                     _id: 0,
-                    product_id: "$product_id"
+                    fuel_id: "$fuel_id"
                 }
             }];
-            let count = await query.joinWithAnd(dbConstants.dbSchema.products, joinArr);
+            let count = await query.joinWithAnd(dbConstants.dbSchema.fuels, joinArr);
 
             joinArr = [{ 
                 $match : columnAndValue
@@ -83,7 +83,7 @@ const getSort = async(requestParam) => {
                     _id: 0,
                 }
             }];
-            let data = await query.joinWithAnd(dbConstants.dbSchema.products, joinArr);
+            let data = await query.joinWithAnd(dbConstants.dbSchema.fuels, joinArr);
             data = JSON.parse(JSON.stringify(data))
             obj.data = data;
             obj.count = count.length;
@@ -100,12 +100,12 @@ const getSort = async(requestParam) => {
 const create = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.products, {name: requestParam.name}, { _id: 0, product_id:1}, { created_at: 1 });
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.fuels, {name: requestParam.name}, { _id: 0, fuel_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_RECORD_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            await query.insertSingle(dbConstants.dbSchema.products, requestParam);
+            await query.insertSingle(dbConstants.dbSchema.fuels, requestParam);
             resolve({});
             return;
         } catch (error) {
@@ -120,15 +120,15 @@ const update = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
             let compareColumnAndValues = {
-                product_id: { $ne: requestParam.product_id },
+                fuel_id: { $ne: requestParam.fuel_id },
                 name: requestParam.name, 
             };
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.products, compareColumnAndValues, { _id: 0, product_id:1}, { created_at: 1 });
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.fuels, compareColumnAndValues, { _id: 0, fuel_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_RECORD_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            await query.updateSingle(dbConstants.dbSchema.products, requestParam, {product_id: requestParam.product_id});
+            await query.updateSingle(dbConstants.dbSchema.fuels, requestParam, {fuel_id: requestParam.fuel_id});
             resolve({});
             return;
         } catch (error) {
@@ -142,10 +142,10 @@ const action = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             if (requestParam['type']== "delete") {
-                await query.removeMultiple(dbConstants.dbSchema.products, { product_id: { $in: requestParam['ids']}});
+                await query.removeMultiple(dbConstants.dbSchema.fuels, { fuel_id: { $in: requestParam['ids']}});
             }
             else{
-                await query.updateMultiple(dbConstants.dbSchema.products, {status: requestParam.type}, {product_id: { $in: requestParam['ids']}});
+                await query.updateMultiple(dbConstants.dbSchema.fuels, {status: requestParam.type}, {fuel_id: { $in: requestParam['ids']}});
             }
             resolve({});
             return;

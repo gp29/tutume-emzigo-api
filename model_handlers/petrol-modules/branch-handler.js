@@ -503,13 +503,13 @@ const submitAmount = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.Conflict));
                 return;
             }
-            let serviceProvider = await query.selectWithAndOne(dbConstants.dbSchema.head_quarters, {head_quarter_id:response.head_quarter_id}, { _id:0, head_quarter_id:1, product_id:1} );
+            let serviceProvider = await query.selectWithAndOne(dbConstants.dbSchema.head_quarters, {head_quarter_id:response.head_quarter_id}, { _id:0, head_quarter_id:1, fuel_id:1} );
             if(!serviceProvider){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id:serviceProvider.product_id}, { _id:0, product_id:1, rate_percentage:1} );
-            // if(!product){
+            let fuel = await query.selectWithAndOne(dbConstants.dbSchema.fuels, {fuel_id:serviceProvider.fuel_id}, { _id:0, fuel_id:1, rate_percentage:1} );
+            // if(!fuel){
             //     reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
             //     return;
             // }
@@ -525,14 +525,14 @@ const submitAmount = async(requestParam) => {
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{total_balance: -parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             await query.updateSingle(dbConstants.dbSchema.riders, {$inc:{used_balance: parseFloat(requestParam.amount)}}, {rider_id: requestParam.rider_id});
             
-            let percentage = product ? parseFloat(product.rate_percentage) : parseFloat(settings.rider_interest_percentage);
+            let percentage = fuel ? parseFloat(fuel.rate_percentage) : parseFloat(settings.rider_interest_percentage);
             let obj = {
                 branch_id: requestParam.branch_id,
                 rider_id: requestParam.rider_id,
                 type:'deduct',
                 amount: requestParam.amount,
                 by_whom:'You',
-                product_id: product ? product.product_id : '',
+                fuel_id: fuel ? fuel.fuel_id : '',
                 percentage: percentage,
                 admin_cost: parseFloat(parseFloat((parseFloat(requestParam.amount) * percentage) / 100).toFixed(2)),
             }
