@@ -2008,6 +2008,79 @@
                 }],
                 "operationId": "PetrolController.TransactionHistory"
             }
+        },
+
+        "/money-agent/signin": {
+            "post": {
+                "x-controller-name": "MoneyAgentController",
+                "x-operation-name": "Signin",
+                "tags": ["MoneyAgentController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "Signin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "MoneyAgentController.Signin"
+            }
+        },
+        "/money-agent/profile": {
+            "get": {
+                "x-controller-name": "MoneyAgentController",
+                "x-operation-name": "GetProfile",
+                "tags": ["MoneyAgentController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "GetProfile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "MoneyAgentController.GetProfile"
+            }
         }
     },
     "components": {},
