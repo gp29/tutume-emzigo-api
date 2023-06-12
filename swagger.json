@@ -2012,9 +2012,9 @@
 
         "/money-agent/signin": {
             "post": {
-                "x-controller-name": "MoneyAgentController",
+                "x-controller-name": "PetrolController",
                 "x-operation-name": "Signin",
-                "tags": ["MoneyAgentController"],
+                "tags": ["PetrolController"],
                 "security": [{
                     "jwt": []
                 }],
@@ -2048,14 +2048,14 @@
                         }
                     }
                 },
-                "operationId": "MoneyAgentController.Signin"
+                "operationId": "PetrolController.Signin"
             }
         },
         "/money-agent/profile": {
             "get": {
-                "x-controller-name": "MoneyAgentController",
+                "x-controller-name": "PetrolController",
                 "x-operation-name": "GetProfile",
-                "tags": ["MoneyAgentController"],
+                "tags": ["PetrolController"],
                 "security": [{
                     "jwt": []
                 }],
@@ -2079,7 +2079,7 @@
                         "type": "string"
                     }
                 }],
-                "operationId": "MoneyAgentController.GetProfile"
+                "operationId": "PetrolController.GetProfile"
             }
         }
     },

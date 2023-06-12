@@ -97,6 +97,8 @@ app.use('/api/panda-vehicle', require('./routes/petrol-modules/vehicle'));
 app.use('/api/fuel', require('./routes/petrol-modules/fuel'));
 app.use('/api/checklist', require('./routes/petrol-modules/checklist'));
 app.use('/api/money-agent', require('./routes/petrol-modules/money-agent'));
+app.use('/api/product-category', require('./routes/petrol-modules/product-category'));
+app.use('/api/product', require('./routes/petrol-modules/product'));
 
 app.use(upload());
 

@@ -31,5 +31,7 @@ module.exports = {
         panda_vehicles: 'Panda_vehicle',
         fuels: 'Fuel',
         checklists: 'Checklist',
+        product_categories: 'Product_category',
+        products: 'Product',
     }
 };

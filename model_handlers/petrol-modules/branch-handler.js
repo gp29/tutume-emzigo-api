@@ -15,6 +15,7 @@ const passwordHandler = require('./../../utils/password-handler');
 const idGenerator = require('./../../utils/id-generator');
 const imgHandler = require('./../../model_handlers/image-handler');
 const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-handler');
+const request = require('request');
 
 const get = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
@@ -459,6 +460,17 @@ const getRiderDetails = async(requestParam) => {
                 return;
             }
             rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
+            
+            // FOR PIN CHANGE SMS
+            let pin = Math.floor(1000 + Math.random() * 9000);
+            let msg = "Hello "+rider.name+", your new PIN for fuel is: "+pin
+            let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
+            await query.updateSingle(dbConstants.dbSchema.riders, {pin}, {rider_id: rider.rider_id});
+
             resolve(await encryptDecryptHandler.encrypt(rider));
             return;
         } catch (error) {
