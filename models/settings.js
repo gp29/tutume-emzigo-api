@@ -53,6 +53,10 @@ var settingsSchema = new Schema({
         type: Number,
         default:0
     },
+    money_agent_commission_percentage:{
+        type: Number,
+        default:0
+    },
 });
 
 // // Execute before each user.save() call
