@@ -99,6 +99,7 @@ app.use('/api/checklist', require('./routes/petrol-modules/checklist'));
 app.use('/api/money-agent', require('./routes/petrol-modules/money-agent'));
 app.use('/api/product-category', require('./routes/petrol-modules/product-category'));
 app.use('/api/product', require('./routes/petrol-modules/product'));
+app.use('/api/installment', require('./routes/petrol-modules/installment'));
 
 app.use(upload());
 

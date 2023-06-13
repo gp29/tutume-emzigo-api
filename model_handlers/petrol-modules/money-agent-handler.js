@@ -7,10 +7,13 @@ const query = require('./../../utils/query-creator');
 const _ = require('underscore');
 const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
+const installmenthistory = require('./../../models/installment-history');
 const moment = require('moment');
 const timeZone = require('moment-timezone');
 const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-handler');
 const passwordHandler = require('./../../utils/password-handler');
+const LD = require('lodash');
+const request = require('request');
 
 const signin = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
@@ -49,10 +52,12 @@ const profile = async(requestParam) => {
                 reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
                 return;
             }
+            let due = await query.selectWithAnd(dbConstants.dbSchema.installment_histories, {user_id:requestParam.user_id, status:'unsettled'}, { _id:0, user_id:1, need_to_pay_amount:1} );
+            let todayEarn = await query.selectWithAnd(dbConstants.dbSchema.installment_histories, {user_id:requestParam.user_id, status:'unsettled', date: moment(new Date()).format('YYYY-MM-DD')}, { _id:0, user_id:1, commission_amount:1} );
             response.user_type = 'money_agent'
             response.user_id = response.user_id
-            response.due_amount = '0 TZS'
-            response.today_earn_amount = '0 TZS'
+            response.due_amount = LD.sumBy(due, 'need_to_pay_amount')+' TZS'
+            response.today_earn_amount = LD.sumBy(todayEarn, 'commission_amount')+' TZS'
             resolve(await encryptDecryptHandler.encrypt(response));
             return;
         } catch (error) {
@@ -63,7 +68,7 @@ const profile = async(requestParam) => {
     })
 };
 
-const riderDetails = async(requestParam) => {
+const riderInstallmentDetails = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
@@ -71,16 +76,88 @@ const riderDetails = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            response = JSON.parse(JSON.stringify(response))
-            if(response.status == 'inactive'){
-                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile:requestParam.mobile}, { _id:0, rider_id:1, name:1, mobile:1} );
+            if(!rider){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            response.user_type = 'money_agent'
-            response.user_id = response.user_id
-            response.due_amount = '0 TZS'
-            response.today_earn_amount = '0 TZS'
-            resolve(await encryptDecryptHandler.encrypt(response));
+            rider = JSON.parse(JSON.stringify(rider))
+            rider.products = []
+            let arr = []
+            let lists = await query.selectWithAnd(dbConstants.dbSchema.installments, {rider_id:rider.rider_id}, { _id:0, product_id:1, total_amount:1, no_of_installment:1, installments:1, status:1} );
+            if(lists.length > 0){
+                lists = JSON.parse(JSON.stringify(lists))
+                await Promise.all(lists.map(async (elem) => {
+                    let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id: elem.product_id}, { _id: 0, name:1}, { created_at: 1 });
+                    elem.product_name = product ? product.name : ''
+                    if(elem.status == 'unpaid'){
+                        arr.push(elem)
+                    }
+                }))
+                rider.products = arr
+            }
+            resolve(await encryptDecryptHandler.encrypt(rider));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const payRiderInstallment = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0, money_agent_commission_percentage:1} );
+            
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1, name:1, mobile:1} );
+            if(!rider){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id:requestParam.product_id}, { _id:0, product_id:1, name:1} );
+            if(!product){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let inst = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id:requestParam.rider_id, product_id: requestParam.product_id}, { _id:0, product_id:1, installments:1} );
+            let val = _.where(inst.installments, {installment_no: requestParam.installment_no})
+            if(val.length > 0){
+                val = val[0]
+                requestParam.amount = parseFloat(val.amount)
+                requestParam.commission_percentage = settings.money_agent_commission_percentage
+                requestParam.commission_amount = parseFloat(parseFloat((requestParam.amount * settings.money_agent_commission_percentage) / 100).toFixed(2))
+                requestParam.need_to_pay_amount = parseFloat(parseFloat(requestParam.amount - requestParam.commission_amount).toFixed(2))
+                requestParam.date = moment(new Date()).format('YYYY-MM-DD')
+                requestParam.status = 'unsettled'
+                let res = await query.insertSingle(dbConstants.dbSchema.installment_histories, requestParam);
+
+                // for update status date
+                let installments = inst.installments
+                _.each(installments, (elem) => {
+                    if(elem.installment_no == requestParam.installment_no && elem.status == 'unpaid'){
+                        elem.status = 'paid'
+                        elem.paid_date = moment(new Date()).format('YYYY-MM-DD')
+                        elem.reference = res.installment_activity_id
+                    }
+                })
+                await query.updateSingle(dbConstants.dbSchema.installments, { installments }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id});
+                
+                // for SMS
+                let msg = "Hello "+rider.name+", your "+requestParam.installment_no+" installment of "+product.name+" has been created."
+                let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
+                request(url, function (error, response, body) {
+                    console.error('error:', error);
+                    console.log('body:', body);
+                });
+            }
+            resolve(await encryptDecryptHandler.encrypt({}));
             return;
         } catch (error) {
             console.log(error)
@@ -93,5 +170,6 @@ const riderDetails = async(requestParam) => {
 module.exports = {
     signin,
     profile,
-    riderDetails
+    riderInstallmentDetails,
+    payRiderInstallment
 };

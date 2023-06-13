@@ -33,5 +33,7 @@ module.exports = {
         checklists: 'Checklist',
         product_categories: 'Product_category',
         products: 'Product',
+        installments: 'Installment',
+        installment_histories: 'Installment_history',
     }
 };

@@ -2081,10 +2081,96 @@
                 }],
                 "operationId": "PetrolController.GetProfile"
             }
+        },
+        "/money-agent/rider-installment-details": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "RiderInstallemtDetails",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "RiderInstallemtDetails",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "mobile",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.RiderInstallemtDetails"
+            }
+        },
+        "/money-agent/pay-rider-installment": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "PayRiderInstallment",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "PayRiderInstallment",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "rider_id": {
+                                        "type": "string"
+                                    },
+                                    "product_id": {
+                                        "type": "string"
+                                    },
+                                    "installment_no": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.PayRiderInstallment"
+            }
         }
     },
     "components": {},
     "servers": [{
         "url": "http://api.tutumee-mzigo.co.tz/api"
+    }, {
+        "url": "http://localhost:4440/api"
     }]
 }
