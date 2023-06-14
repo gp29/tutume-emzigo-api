@@ -14,6 +14,7 @@ const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-ha
 const passwordHandler = require('./../../utils/password-handler');
 const LD = require('lodash');
 const request = require('request');
+const imgHandler = require('./../../model_handlers/image-handler');
 
 const signin = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
@@ -180,17 +181,14 @@ const recentActivities = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.albums, {status:'approved'}, { _id:0, album_id: 1, artist_id:1, title:1, image:1, download_price:1}, { created_at: -1 }, {skip, limit});
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.installment_histories, {user_id: requestParam.user_id}, { _id:0, user_id: 1, rider_id:1, amount:1, created_at:1, status:1}, { created_at: -1 }, {skip, limit});
             lists = JSON.parse(JSON.stringify(lists))
             await Promise.all(lists.map(async (elem) => {
-                elem.image = elem.image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`zamar/albums/${elem.image}`}) : ''
-                elem.artist_name = ''
-                let artist = await query.selectWithAndOne(dbConstants.dbSchema.artists, {artist_id:elem.artist_id}, { _id:0, name: 1, artist_id:1} );
-                if(artist){
-                    elem.artist_name = artist.name
-                }
-                let purchase = await query.selectWithAndOne(dbConstants.dbSchema.transactions, {user_id: requestParam.user_id, purchase_type:'album', purchase_id: elem.album_id, status:'success'}, { _id:0, transaction_id: 1} );
-                elem.is_paid = purchase ? true : false
+                elem.amount = elem.amount+' TZS'
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+                let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:elem.rider_id}, { _id:0, name: 1, rider_id:1, profile_photo:1} );
+                elem.rider_name = rider ? rider.name : ''
+                elem.rider_photo = rider ? (rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : '') : ''
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
             return;

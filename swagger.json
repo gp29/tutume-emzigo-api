@@ -2165,6 +2165,37 @@
                 },
                 "operationId": "PetrolController.PayRiderInstallment"
             }
+        },
+        "/money-agent/recent-activities": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "RecentActivities",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "RecentActivities",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.RecentActivities"
+            }
         }
     },
     "components": {},
