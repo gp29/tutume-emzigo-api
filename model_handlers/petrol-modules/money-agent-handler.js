@@ -167,9 +167,45 @@ const payRiderInstallment = async(requestParam) => {
     })
 };
 
+const recentActivities = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let page = (requestParam.page ? requestParam.page : 1);
+            let limit = 20;
+            page -= 1;
+            let skip = page * limit;
+
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.albums, {status:'approved'}, { _id:0, album_id: 1, artist_id:1, title:1, image:1, download_price:1}, { created_at: -1 }, {skip, limit});
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                elem.image = elem.image != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`zamar/albums/${elem.image}`}) : ''
+                elem.artist_name = ''
+                let artist = await query.selectWithAndOne(dbConstants.dbSchema.artists, {artist_id:elem.artist_id}, { _id:0, name: 1, artist_id:1} );
+                if(artist){
+                    elem.artist_name = artist.name
+                }
+                let purchase = await query.selectWithAndOne(dbConstants.dbSchema.transactions, {user_id: requestParam.user_id, purchase_type:'album', purchase_id: elem.album_id, status:'success'}, { _id:0, transaction_id: 1} );
+                elem.is_paid = purchase ? true : false
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     signin,
     profile,
     riderInstallmentDetails,
-    payRiderInstallment
+    payRiderInstallment,
+    recentActivities
 };
