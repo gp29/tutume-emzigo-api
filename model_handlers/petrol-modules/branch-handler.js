@@ -46,6 +46,13 @@ const get = async(requestParam) => {
 const getSort = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
+            let msg = "Hello Victor, your new PIN for fuel is: 1234"
+            let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno=743321000&msgtext="+msg
+            request(url, function (error, response, body) {
+                console.error('error:', error);
+                console.log('body:', body);
+            });
+
             let columnAndValue = {}
             if(requestParam.text && requestParam.text !=''){
                 columnAndValue['$or'] = [{
