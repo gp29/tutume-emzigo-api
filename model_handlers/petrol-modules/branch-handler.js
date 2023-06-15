@@ -47,7 +47,7 @@ const getSort = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             let msg = "Hello Victor, your new PIN for fuel is: 1234"
-            let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno=743321000&msgtext="+msg
+            let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Panda&CountryCode=255&mobileno=743321000&msgtext="+msg
             request(url, function (error, response, body) {
                 console.error('error:', error);
                 console.log('body:', body);
@@ -471,7 +471,7 @@ const getRiderDetails = async(requestParam) => {
             // FOR PIN CHANGE SMS
             let pin = Math.floor(1000 + Math.random() * 9000);
             let msg = "Hello "+rider.name+", your new PIN for fuel is: "+pin
-            let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
+            let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
             request(url, function (error, response, body) {
                 console.error('error:', error);
                 console.log('body:', body);
