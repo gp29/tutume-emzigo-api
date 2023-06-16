@@ -77,12 +77,13 @@ const riderInstallmentDetails = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile:requestParam.mobile}, { _id:0, rider_id:1, name:1, mobile:1} );
+            let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile:requestParam.mobile}, { _id:0, rider_id:1, name:1, mobile:1, profile_photo:1} );
             if(!rider){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
             rider = JSON.parse(JSON.stringify(rider))
+            rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
             rider.products = []
             let arr = []
             let lists = await query.selectWithAnd(dbConstants.dbSchema.installments, {rider_id:rider.rider_id}, { _id:0, product_id:1, total_amount:1, no_of_installment:1, installments:1, status:1} );
