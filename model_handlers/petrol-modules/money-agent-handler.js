@@ -118,7 +118,6 @@ const riderInstallmentDetails = async(requestParam) => {
 const payRiderInstallment = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log(requestParam)
             let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0, money_agent_commission_percentage:1} );
             
             let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
@@ -139,8 +138,6 @@ const payRiderInstallment = async(requestParam) => {
             requestParam.installment_no = parseFloat(requestParam.installment_no)
             let inst = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id:requestParam.rider_id, product_id: requestParam.product_id}, { _id:0, product_id:1, installments:1} );
             let val = _.where(inst.installments, {installment_no: requestParam.installment_no})
-            console.log(inst)
-            console.log(val)
             if(val.length > 0){
                 val = val[0]
                 requestParam.amount = parseFloat(val.amount)
@@ -164,7 +161,7 @@ const payRiderInstallment = async(requestParam) => {
                 
                 // for SMS
                 let msg = "Hello "+rider.name+", your "+requestParam.installment_no+" installment of "+product.name+" has been created."
-                let url = "http://mshastra.com/sendurl.aspx?user=PANDALTD&pwd=uu641py9&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
+                let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
                 request(url, function (error, response, body) {
                     console.error('error:', error);
                     console.log('body:', body);
