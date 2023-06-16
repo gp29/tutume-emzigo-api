@@ -1634,14 +1634,14 @@
         "/branch/signin": {
             "post": {
                 "x-controller-name": "PetrolController",
-                "x-operation-name": "Signin",
+                "x-operation-name": "BranchSignin",
                 "tags": ["PetrolController"],
                 "security": [{
                     "jwt": []
                 }],
                 "responses": {
                     "200": {
-                        "description": "Signin",
+                        "description": "BranchSignin",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1669,7 +1669,7 @@
                         }
                     }
                 },
-                "operationId": "PetrolController.Signin"
+                "operationId": "PetrolController.BranchSignin"
             }
         },
         "/branch/profile": {
@@ -2195,6 +2195,209 @@
                     }
                 }],
                 "operationId": "PetrolController.RecentActivities"
+            }
+        },
+
+        "/mwenyekiti/signin": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiSignin",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiSignin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.MwenyekitiSignin"
+            }
+        },
+        "/mwenyekiti/profile": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiGetProfile",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiGetProfile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.MwenyekitiGetProfile"
+            }
+        },
+        "/mwenyekiti/rider-list": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiRiderList",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiRiderList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.MwenyekitiRiderList"
+            }
+        },
+        "/mwenyekiti/region-list": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiRegionList",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiRegionList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.MwenyekitiRegionList"
+            }
+        },
+        "/mwenyekiti/kijiwe-list": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiKijiweList",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiKijiweList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "region_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.MwenyekitiKijiweList"
+            }
+        },
+        "/mwenyekiti/vehicle-list": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiVehicleList",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiVehicleList",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "user_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.MwenyekitiVehicleList"
             }
         }
     },

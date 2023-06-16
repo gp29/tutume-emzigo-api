@@ -9,6 +9,10 @@ var riderSchema = new Schema({
         type: String,
         default:''
     },
+    user_id: {
+        type: String,
+        default:''
+    },
     name: {
         type: String,
         default:''
