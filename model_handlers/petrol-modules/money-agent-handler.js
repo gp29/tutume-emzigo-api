@@ -85,7 +85,6 @@ const riderInstallmentDetails = async(requestParam) => {
             rider = JSON.parse(JSON.stringify(rider))
             rider.profile_photo = rider.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${rider.profile_photo}`}) : ''
             rider.products = []
-            let arr = []
             let lists = await query.selectWithAnd(dbConstants.dbSchema.installments, {rider_id:rider.rider_id}, { _id:0, product_id:1, total_amount:1, no_of_installment:1, installments:1, status:1} );
             console.log(lists)
             if(lists.length > 0){
@@ -93,11 +92,15 @@ const riderInstallmentDetails = async(requestParam) => {
                 await Promise.all(lists.map(async (elem) => {
                     let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id: elem.product_id}, { _id: 0, name:1}, { created_at: 1 });
                     elem.product_name = product ? product.name : ''
-                    if(elem.status == 'unpaid'){
-                        arr.push(elem)
-                    }
+                    let installments = []
+                    _.each(elem.installments, (itm) => {
+                        if(itm.status == 'unpaid'){
+                            installments.push(itm)
+                        }
+                    })
+                    elem.installments = installments
                 }))
-                rider.products = arr
+                rider.products = lists
                 resolve(await encryptDecryptHandler.encrypt(rider));
                 return;
             }
