@@ -105,6 +105,10 @@ var riderSchema = new Schema({
         type: Number,
         default:0
     },
+    status: {
+        type: String,
+        default: 'active'
+    },
     created_at: {
         type: Date,
         default: Date.now

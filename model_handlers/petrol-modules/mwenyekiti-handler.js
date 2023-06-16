@@ -9,6 +9,7 @@ const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
 const moment = require('moment');
 const timeZone = require('moment-timezone');
+const riderHandler = require('./../../model_handlers/petrol-modules/rider-handler');
 const encryptDecryptHandler = require('./../../model_handlers/encrypt-decrypt-handler');
 const passwordHandler = require('./../../utils/password-handler');
 const LD = require('lodash');
@@ -146,11 +147,98 @@ const vehicleList = async(requestParam) => {
     })
 };
 
+const createRider = async(requestParam, req) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            if(requestParam.user_id){
+                requestParam.user_id = await encryptDecryptHandler.decryptString(requestParam.user_id)
+            }
+            if(requestParam.name){
+                requestParam.name = await encryptDecryptHandler.decryptString(requestParam.name)
+            }
+            if(requestParam.mobile){
+                requestParam.mobile = await encryptDecryptHandler.decryptString(requestParam.mobile)
+            }
+            if(requestParam.email){
+                requestParam.email = await encryptDecryptHandler.decryptString(requestParam.email)
+            }
+            if(requestParam.password){
+                requestParam.password = await encryptDecryptHandler.decryptString(requestParam.password)
+            }
+            if(requestParam.address){
+                requestParam.address = await encryptDecryptHandler.decryptString(requestParam.address)
+            }
+            if(requestParam.nida_number){
+                requestParam.nida_number = await encryptDecryptHandler.decryptString(requestParam.nida_number)
+            }
+            if(requestParam.region_id){
+                requestParam.region_id = await encryptDecryptHandler.decryptString(requestParam.region_id)
+            }
+            if(requestParam.kijiwe_id){
+                requestParam.kijiwe_id = await encryptDecryptHandler.decryptString(requestParam.kijiwe_id)
+            }
+            if(requestParam.vehicle_id){
+                requestParam.vehicle_id = await encryptDecryptHandler.decryptString(requestParam.vehicle_id)
+            }
+            if(requestParam.referee_name){
+                requestParam.referee_name = await encryptDecryptHandler.decryptString(requestParam.referee_name)
+            }
+            if(requestParam.referee_contact_number){
+                requestParam.referee_contact_number = await encryptDecryptHandler.decryptString(requestParam.referee_contact_number)
+            }
+            if(requestParam.fuel_credit_limit){
+                requestParam.fuel_credit_limit = await encryptDecryptHandler.decryptString(requestParam.fuel_credit_limit)
+            }
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let compareColumnAndValues = {mobile: requestParam.mobile}
+            if(requestParam.email && requestParam.email != ''){
+                requestParam.email = requestParam.email.trim();
+                let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
+                compareColumnAndValues = {
+                    $or: [{
+                        email: regexEmail
+                    }, {
+                        mobile: requestParam.mobile,
+                    }]
+                };
+            }
+            let exists = await query.selectWithAndOne(dbConstants.dbSchema.riders, compareColumnAndValues, { _id: 0, rider_id:1}, { created_at: 1 });
+            if(exists){
+                reject(errors(labels.LBL_EMAIL_OR_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.Conflict));
+                return;
+            }
+            if(req.files){
+                if(req.files.profile_photo){
+                    requestParam.profile_photo = await imgHandler.uploadImage(req.files.profile_photo, config.aws.s3.riderBucket)
+                }
+                if(req.files.driving_license){
+                    requestParam.driving_license = await imgHandler.uploadImage(req.files.driving_license, config.aws.s3.riderBucket)
+                }
+            }
+            requestParam.account_number = await riderHandler.generateAccountNumber();
+            requestParam.password = await passwordHandler.encrypt(requestParam.password.toString());
+            requestParam.status = 'inactive'
+            await query.insertSingle(dbConstants.dbSchema.riders, requestParam);
+            resolve(await encryptDecryptHandler.encrypt({}));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     signin,
     profile,
     riderList,
     regionList,
     kijiweList,
-    vehicleList
+    vehicleList,
+    createRider
 };

@@ -2399,6 +2399,87 @@
                 }],
                 "operationId": "PetrolController.MwenyekitiVehicleList"
             }
+        },
+        "/mwenyekiti/create-rider": {
+            "post": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "MwenyekitiCreateRider",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "MwenyekitiCreateRider",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "description": "Optional"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "profile_photo": {
+                                        "type": "file"
+                                    },
+                                    "driving_license": {
+                                        "type": "file"
+                                    },
+                                    "nida_number": {
+                                        "type": "string"
+                                    },
+                                    "region_id": {
+                                        "type": "string"
+                                    },
+                                    "kijiwe_id": {
+                                        "type": "string"
+                                    },
+                                    "vehicle_id": {
+                                        "type": "string"
+                                    },
+                                    "referee_name": {
+                                        "type": "string"
+                                    },
+                                    "referee_contact_number": {
+                                        "type": "string"
+                                    },
+                                    "fuel_credit_limit": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "PetrolController.MwenyekitiCreateRider"
+            }
         }
     },
     "components": {},

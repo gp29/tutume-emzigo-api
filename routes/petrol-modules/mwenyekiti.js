@@ -124,4 +124,26 @@ router.get('/vehicle-list', async(req, res) => {
     }
 });
 
+router.post('/create-rider', async(req, res) => {
+    try {
+        req.body.time_zone = config.time_zone
+        if(req.headers.time_zone){
+            req.body.time_zone = req.headers.time_zone
+        }
+        if (!req.body.user_id || !req.body.name || !req.body.mobile || !req.body.password || !req.body.address || !req.files.profile_photo || !req.files.driving_license) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        if (!req.body.nida_number || !req.body.region_id || !req.body.kijiwe_id || !req.body.vehicle_id || !req.body.referee_name || !req.body.referee_contact_number || !req.body.fuel_credit_limit) {
+            jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
+            return
+        }
+        let response = await handler.createRider(req.body, req);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        console.log(error)
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

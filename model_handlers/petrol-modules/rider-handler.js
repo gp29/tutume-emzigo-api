@@ -123,6 +123,7 @@ const getSort = async(requestParam, req) => {
                     vehicle_id: "$vehicle_id",
                     followup_date: "$followup_date",
                     checklist_percentage: "$checklist_percentage",
+                    status: "$status",
                     // qrcode: "$qrcode",
                     // qrcode_pdf: "$qrcode_pdf",
                 }
@@ -153,7 +154,19 @@ const getSort = async(requestParam, req) => {
 const create = async(requestParam, req) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {mobile: requestParam.mobile}, { _id: 0, rider_id:1}, { created_at: 1 });
+            let compareColumnAndValues = {mobile: requestParam.mobile}
+            if(requestParam.email && requestParam.email != ''){
+                requestParam.email = requestParam.email.trim();
+                let regexEmail = new RegExp(['^', requestParam.email, '$'].join(''), 'i');
+                compareColumnAndValues = {
+                    $or: [{
+                        email: regexEmail
+                    }, {
+                        mobile: requestParam.mobile,
+                    }]
+                };
+            }
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, compareColumnAndValues, { _id: 0, rider_id:1}, { created_at: 1 });
             if(response){
                 reject(errors(labels.LBL_MOBILE_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
                 return;
@@ -790,6 +803,10 @@ const signin = async(requestParam, req) => {
                 return;
             }
             response = JSON.parse(JSON.stringify(response))
+            if(response.status == 'inactive'){
+                reject(errors(labels.LBL_ACCOUNT_INACTIVE[config.default_language], responseCodes.NotActive));
+                return;
+            }
             let encryptPassword = await passwordHandler.encrypt(requestParam.password.toString());
             if(encryptPassword != response.password){
                 reject(errors(labels.LBL_INVALID_PWD[config.default_language], responseCodes.InvalidOTP));
