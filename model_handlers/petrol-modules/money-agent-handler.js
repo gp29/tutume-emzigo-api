@@ -136,6 +136,7 @@ const payRiderInstallment = async(requestParam) => {
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
+            requestParam.installment_no = parseFloat(requestParam.installment_no)
             let inst = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id:requestParam.rider_id, product_id: requestParam.product_id}, { _id:0, product_id:1, installments:1} );
             let val = _.where(inst.installments, {installment_no: requestParam.installment_no})
             console.log(inst)
