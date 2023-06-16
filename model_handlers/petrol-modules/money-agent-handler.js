@@ -87,6 +87,7 @@ const riderInstallmentDetails = async(requestParam) => {
             rider.products = []
             let arr = []
             let lists = await query.selectWithAnd(dbConstants.dbSchema.installments, {rider_id:rider.rider_id}, { _id:0, product_id:1, total_amount:1, no_of_installment:1, installments:1, status:1} );
+            console.log(lists)
             if(lists.length > 0){
                 lists = JSON.parse(JSON.stringify(lists))
                 await Promise.all(lists.map(async (elem) => {
@@ -97,9 +98,13 @@ const riderInstallmentDetails = async(requestParam) => {
                     }
                 }))
                 rider.products = arr
+                resolve(await encryptDecryptHandler.encrypt(rider));
+                return;
             }
-            resolve(await encryptDecryptHandler.encrypt(rider));
-            return;
+            else{
+                resolve(await encryptDecryptHandler.encrypt(rider));
+                return;    
+            }
         } catch (error) {
             console.log(error)
             reject(error)
