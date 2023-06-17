@@ -67,12 +67,17 @@ const profile = async(requestParam) => {
 const riderList = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
+            let page = (requestParam.page ? requestParam.page : 1);
+            let limit = 20;
+            page -= 1;
+            let skip = page * limit;
+
             let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1} );
             if(!response){
                 reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
                 return;
             }
-            let lists = await query.selectWithAnd(dbConstants.dbSchema.riders, {user_id:requestParam.user_id}, { _id:0, rider_id:1, name:1, mobile:1, status:1, profile_photo:1}, {created_at: -1} );
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.riders, {user_id: requestParam.user_id}, { _id:0, rider_id:1, name:1, mobile:1, status:1, profile_photo:1}, { created_at: -1 }, {skip, limit});
             lists = JSON.parse(JSON.stringify(lists))
             await Promise.all(lists.map(async (elem) => {
                 elem.profile_photo = elem.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${elem.profile_photo}`}) : ''

@@ -55,7 +55,7 @@ router.get('/rider-list', async(req, res) => {
         if(req.headers.time_zone){
             req.query.time_zone = req.headers.time_zone
         }
-        if (!req.query.user_id) {
+        if (!req.query.user_id || !req.query.page) {
             jsonResponse(res, responseCodes.BadRequest, errors(labels.LBL_MISSING_PARAMETERS[config.default_language], responseCodes.BadRequest), null)
             return
         }
