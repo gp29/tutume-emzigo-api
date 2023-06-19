@@ -78,11 +78,6 @@ const getSort = async(requestParam) => {
 const create = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
-            let response = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id: requestParam.rider_id, product_id: requestParam.product_id}, { _id: 0, product_id:1}, { created_at: 1 });
-            if(response){
-                reject(errors(labels.LBL_RECORD_ALREADY_EXISTS[config.default_language], responseCodes.ResourceNotFound));
-                return;
-            }
             await query.insertSingle(dbConstants.dbSchema.installments, requestParam);
             let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id: requestParam.product_id}, { _id: 0, product:1, name:1}, { created_at: -1 });
             let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, name:1, mobile:1}, { created_at: -1 });
