@@ -87,6 +87,7 @@ const riderInstallmentDetails = async(requestParam) => {
             rider.products = []
             let lists = await query.selectWithAnd(dbConstants.dbSchema.installments, {rider_id:rider.rider_id}, { _id:0, product_id:1, total_amount:1, no_of_installment:1, installments:1, status:1} );
             if(lists.length > 0){
+                let finalArr = []
                 lists = JSON.parse(JSON.stringify(lists))
                 await Promise.all(lists.map(async (elem) => {
                     let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id: elem.product_id}, { _id: 0, name:1}, { created_at: 1 });
@@ -98,8 +99,11 @@ const riderInstallmentDetails = async(requestParam) => {
                         }
                     })
                     elem.installments = installments
+                    if(installments.length > 0){
+                        finalArr.push(elem)
+                    }
                 }))
-                rider.products = lists
+                rider.products = finalArr
                 resolve(await encryptDecryptHandler.encrypt(rider));
                 return;
             }
