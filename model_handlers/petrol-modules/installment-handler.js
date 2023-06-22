@@ -10,6 +10,7 @@ const labels = require('./../../utils/labels.json');
 const responseCodes = require('./../../utils/response-codes');
 const timeZone = require('moment-timezone');
 const moment = require('moment');
+const LD = require('lodash');
 const async = require('async');
 const request = require('request');
 
@@ -161,9 +162,98 @@ const getInstallment = async(requestParam) => {
     })
 };
 
+const getReconciliation = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let columnAndValue = {user_id: requestParam.user_id, status:'unsettled'}
+
+            let page = requestParam.page ? requestParam.page : 0 ;
+            let sizePerPage = requestParam.sizePerPage ? requestParam.sizePerPage : 10 ;
+            let skip = page * sizePerPage;
+            let obj = {};
+
+            let joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $project: {
+                    _id: 0,
+                    installment_activity_id: "$installment_activity_id"
+                }
+            }];
+            let count = await query.joinWithAnd(dbConstants.dbSchema.installment_histories, joinArr);
+
+            joinArr = [{ 
+                $match : columnAndValue
+            }, { 
+                $sort : {created_at:-1}
+            }, {
+                $skip: skip
+            }, {
+                $limit: sizePerPage
+            }, {
+                $project: {
+                    _id: 0,
+                    installment_activity_id:1,
+                    user_id:1,
+                    rider_id:1,
+                    product_id:1,
+                    installment_no:1,
+                    amount:1,
+                    need_to_pay_amount:1,
+                    date:1,
+                }
+            }];
+            let data = await query.joinWithAnd(dbConstants.dbSchema.installment_histories, joinArr);
+            data = JSON.parse(JSON.stringify(data))
+            await Promise.all(data.map(async (elem) => {
+                elem.amount = elem.amount+' TZS'
+                elem.need_to_pay_amount = elem.need_to_pay_amount+' TZS'
+
+                let user = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id: elem.user_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.user_name = user ? user.name : ''
+
+                let rider = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: elem.rider_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.rider_name = rider ? rider.name : ''
+
+                let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id: elem.product_id}, { _id: 0, name:1}, { created_at: 1 });
+                elem.product_name = product ? product.name : ''
+            }));
+            obj.data = data;
+            obj.count = count.length;
+
+            let total = await query.selectWithAnd(dbConstants.dbSchema.installment_histories, columnAndValue, { _id: 0, need_to_pay_amount:1}, { created_at: -1 });
+            obj.total_amount_to_settle = parseFloat(LD.sumBy(total, 'need_to_pay_amount')).toFixed(2)+' TZS'
+            resolve(obj);
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
+const settlementReconciliation = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await query.updateMultiple(dbConstants.dbSchema.installment_histories, {status: 'settled'}, {user_id: { $in: requestParam['user_id']}});
+            resolve({});
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     getSort,
     create,
     action,
-    getInstallment
+    getInstallment,
+    getReconciliation,
+    settlementReconciliation
 };

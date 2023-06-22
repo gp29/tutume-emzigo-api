@@ -46,4 +46,22 @@ router.get('/get-installment', async(req, res) => {
     }
 });
 
+router.post('/get-reconciliation', async(req, res) => {
+    try {
+        let response = await handler.getReconciliation(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
+router.post('/settlement-reconciliation', async(req, res) => {
+    try {
+        let response = await handler.settlementReconciliation(req.body);
+        jsonResponse(res, responseCodes.OK, null, response);
+    } catch (error) {
+        jsonResponse(res, error.code, error, null);
+    }
+});
+
 module.exports = router;

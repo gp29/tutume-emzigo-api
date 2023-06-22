@@ -21,6 +21,15 @@ const get = async(requestParam) => {
             if(requestParam.status){
                 columnValue.status = requestParam.status
             }
+            if(requestParam.type){
+                if(requestParam.type == 'money-agent'){
+                    columnValue.status = 'active'
+                    let role = await query.selectWithAndOne(dbConstants.dbSchema.roles, {title:'Money agent'}, { _id: 0, role_id:1}, { created_at: 1 });
+                    if(role) {
+                        columnValue.role_id = role.role_id
+                    }
+                }
+            }
             let response = await query.selectWithAnd(dbConstants.dbSchema.users, columnValue, { _id: 0}, { created_at: 1 });
             if(requestParam.user_id){
                 response = response[0]
