@@ -164,7 +164,7 @@ const payRiderInstallment = async(requestParam) => {
                 await query.updateSingle(dbConstants.dbSchema.installments, { installments }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id});
                 
                 // for SMS
-                let msg = "Hello "+rider.name+", your "+requestParam.installment_no+" installment of "+product.name+" has been created."
+                let msg = "Hello "+rider.name+", Payment of TZS "+requestParam.amount+" successfully Received By Panda for Installment "+requestParam.installment_no+" of "+product.name
                 let url = "http://mshastra.com/sendurl.aspx?user=Tutumeltd&pwd=epp1pjse&senderid=Panda&CountryCode=255&mobileno="+rider.mobile+"&msgtext="+msg
                 request(url, function (error, response, body) {
                     console.error('error:', error);
