@@ -566,13 +566,13 @@ const settlement = async(requestParam,)=> {
         try {
             console.log(requestParam)
             if(parseFloat(requestParam.total_amount_to_pay) == parseFloat(requestParam.amount)){
-                let fuel_credit_limit = 0
+                let total_balance = 0
                 let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id: requestParam.rider_id}, { _id: 0, rider_id:1, fuel_credit_limit:1}, { created_at: -1 });
                 if(response){
-                    if(response.fuel_credit_limit) fuel_credit_limit = response.fuel_credit_limit
+                    if(response.fuel_credit_limit) total_balance = response.fuel_credit_limit
                 }
-                console.log(fuel_credit_limit)
-                await query.updateSingle(dbConstants.dbSchema.riders, {used_balance: 0, fuel_credit_limit}, {rider_id: requestParam.rider_id});
+                console.log(total_balance)
+                await query.updateSingle(dbConstants.dbSchema.riders, {used_balance: 0, total_balance}, {rider_id: requestParam.rider_id});
                 await query.updateMultiple(dbConstants.dbSchema.rider_activities, {is_settlement: true}, {rider_id: { $in: requestParam['rider_id']}});
             }
             else{
