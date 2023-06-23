@@ -51,6 +51,7 @@ const getSort = async(requestParam) => {
                     product_id:1,
                     total_amount:1,
                     no_of_installment:1,
+                    installments:1,
                 }
             }];
             let data = await query.joinWithAnd(dbConstants.dbSchema.installments, joinArr);
