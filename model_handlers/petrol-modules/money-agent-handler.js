@@ -122,6 +122,8 @@ const riderInstallmentDetails = async(requestParam) => {
 const payRiderInstallment = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
+            console.log("Pay Insallment")
+            console.log(requestParam)
             let settings = await query.selectWithAndOne(dbConstants.dbSchema.settings, {}, { _id:0, money_agent_commission_percentage:1} );
             
             let response = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:requestParam.user_id}, { _id:0, user_id:1, name:1, email:1, mobile:1, status:1} );
