@@ -95,6 +95,7 @@ const riderInstallmentDetails = async(requestParam) => {
                     let installments = []
                     _.each(elem.installments, (itm) => {
                         if(itm.status == 'unpaid'){
+                            itm.amount = itm.amount+' TZS'
                             installments.push(itm)
                         }
                     })
