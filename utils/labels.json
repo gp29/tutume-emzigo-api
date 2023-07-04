@@ -78,6 +78,6 @@
         "EN": "Branch don't have to sufficient balance."
     },
     "LBL_PRODUCT_RIDER_INSTALLMENT_EXISTS": {
-        "EN": "Rider have already exists this product's installment."
+        "EN": "Rider have already exists this product's unpaid installment."
     }
 }
