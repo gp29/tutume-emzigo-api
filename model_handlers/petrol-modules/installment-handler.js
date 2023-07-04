@@ -118,7 +118,7 @@ const action = async(requestParam) => {
     return new Promise(async(resolve, reject) => {
         try {
             if (requestParam['type']== "delete") {
-                await query.removeMultiple(dbConstants.dbSchema.installments, { product_id: { $in: requestParam['ids']}});
+                await query.removeMultiple(dbConstants.dbSchema.installments, { installment_id: { $in: requestParam['ids']}});
             }
             resolve({});
             return;
