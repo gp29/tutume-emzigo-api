@@ -143,7 +143,7 @@ const payRiderInstallment = async(requestParam) => {
                 return;
             }
             requestParam.installment_no = parseFloat(requestParam.installment_no)
-            let inst = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id:requestParam.rider_id, product_id: requestParam.product_id}, { _id:0, product_id:1, installments:1} );
+            let inst = await query.selectWithAndOne(dbConstants.dbSchema.installments, {rider_id:requestParam.rider_id, product_id: requestParam.product_id, all_paid:'no'}, { _id:0, product_id:1, installments:1} );
             let val = _.where(inst.installments, {installment_no: requestParam.installment_no})
             if(val.length > 0){
                 val = val[0]
@@ -164,7 +164,15 @@ const payRiderInstallment = async(requestParam) => {
                         elem.reference = res.installment_activity_id
                     }
                 })
-                await query.updateSingle(dbConstants.dbSchema.installments, { installments }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id});
+
+                let all_paid = 'yes'
+                _.each(installments, (itm) => {
+                    if(itm.status == 'unpaid'){
+                        all_paid = 'no'
+                    }
+                })
+
+                await query.updateSingle(dbConstants.dbSchema.installments, { installments, all_paid }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id});
                 
                 // for SMS
                 let msg = "Hello "+rider.name+", Payment of TZS "+requestParam.amount+" successfully Received By Panda for Installment "+requestParam.installment_no+" of "+product.name

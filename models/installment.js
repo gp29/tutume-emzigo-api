@@ -29,6 +29,10 @@ let installmentSchema = new Schema({
         type: Array,
         default:[]
     },
+    all_paid: {
+        type: String,
+        default: 'no'
+    },
     created_at: {
         type: Date,
         default: Date.now
