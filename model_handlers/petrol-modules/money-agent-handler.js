@@ -172,7 +172,7 @@ const payRiderInstallment = async(requestParam) => {
                     }
                 })
 
-                await query.updateSingle(dbConstants.dbSchema.installments, { installments, all_paid }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id});
+                await query.updateSingle(dbConstants.dbSchema.installments, { installments, all_paid }, {rider_id:requestParam.rider_id, product_id: requestParam.product_id, all_paid:'no'});
                 
                 // for SMS
                 let msg = "Hello "+rider.name+", Payment of TZS "+requestParam.amount+" successfully Received By Panda for Installment "+requestParam.installment_no+" of "+product.name
