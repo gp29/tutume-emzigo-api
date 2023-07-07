@@ -81,6 +81,7 @@ const riderList = async(requestParam) => {
             lists = JSON.parse(JSON.stringify(lists))
             await Promise.all(lists.map(async (elem) => {
                 elem.profile_photo = elem.profile_photo != '' ? await imgHandler.getImage({bucket: config.aws.bucketName, key:`emzigo/riders/${elem.profile_photo}`}) : ''
+                elem.status = LD.upperFirst(elem.status)
             }))
             resolve(await encryptDecryptHandler.encrypt(lists));
             return;
