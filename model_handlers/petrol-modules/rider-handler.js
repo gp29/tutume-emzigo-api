@@ -890,6 +890,39 @@ const transactionHistory = async(requestParam) => {
     })
 };
 
+const installmentHistory = async(requestParam) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let page = (requestParam.page ? requestParam.page : 1);
+            let limit = 15;
+            page -= 1;
+            let skip = page * limit;
+
+            let response = await query.selectWithAndOne(dbConstants.dbSchema.riders, {rider_id:requestParam.rider_id}, { _id:0, rider_id:1} );
+            if(!response){
+                reject(errors(labels.LBL_USER_NOT_FOUND[config.default_language], responseCodes.ResourceNotFound));
+                return;
+            }
+            let matchColumn = {rider_id: requestParam.rider_id}
+            let lists = await query.selectWithAndFilter(dbConstants.dbSchema.installment_histories, matchColumn, { _id:0, installment_activity_id: 1, rider_id:1, user_id:1, product_id:1, installment_no:1, amount:1, created_at:1}, { created_at: -1 }, { skip, limit });
+            lists = JSON.parse(JSON.stringify(lists))
+            await Promise.all(lists.map(async (elem) => {
+                let user = await query.selectWithAndOne(dbConstants.dbSchema.users, {user_id:elem.user_id}, { _id:0, user_id:1, name:1} );
+                elem.submited_user = user ? user.name : ''
+                let product = await query.selectWithAndOne(dbConstants.dbSchema.products, {product_id:elem.product_id}, { _id:0, product_id:1, name:1} );
+                elem.product_name = product ? product.name : ''
+                elem.created_at = timeZone(new Date(elem.created_at)).tz(requestParam.time_zone).format('lll')
+            }))
+            resolve(await encryptDecryptHandler.encrypt(lists));
+            return;
+        } catch (error) {
+            console.log(error)
+            reject(error)
+            return
+        }
+    })
+};
+
 module.exports = {
     get,
     getSort,
@@ -907,5 +940,6 @@ module.exports = {
     //APIs
     signin,
     profile,
-    transactionHistory
+    transactionHistory,
+    installmentHistory
 };
