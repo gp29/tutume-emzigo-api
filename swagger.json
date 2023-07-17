@@ -2009,6 +2009,50 @@
                 "operationId": "PetrolController.TransactionHistory"
             }
         },
+        "/rider/installment-history": {
+            "get": {
+                "x-controller-name": "PetrolController",
+                "x-operation-name": "InstallmentHistory",
+                "tags": ["PetrolController"],
+                "security": [{
+                    "jwt": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "InstallmentHistory",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                    "name": "rider_id",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }, {
+                    "name": "page",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }, {
+                    "name": "date",
+                    "description": "Optional => Pass while filter => format YYYY-MM-DD",
+                    "in": "query",
+                    "schema": {
+                        "type": "string"
+                    }
+                }],
+                "operationId": "PetrolController.InstallmentHistory"
+            }
+        },
 
         "/money-agent/signin": {
             "post": {

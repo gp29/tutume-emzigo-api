@@ -904,6 +904,9 @@ const installmentHistory = async(requestParam) => {
                 return;
             }
             let matchColumn = {rider_id: requestParam.rider_id}
+            if(requestParam.date && requestParam.date != ''){
+                matchColumn.date = requestParam.date
+            }
             let lists = await query.selectWithAndFilter(dbConstants.dbSchema.installment_histories, matchColumn, { _id:0, installment_activity_id: 1, rider_id:1, user_id:1, product_id:1, installment_no:1, amount:1, created_at:1}, { created_at: -1 }, { skip, limit });
             lists = JSON.parse(JSON.stringify(lists))
             await Promise.all(lists.map(async (elem) => {
